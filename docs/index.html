@@ -150,6 +150,36 @@
             text-align: center;
         }
 
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 1205;
+            width: 46px;
+            height: 46px;
+            border: 0;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #f47fb0 0%, #ee8fc1 100%);
+            color: #ffffff;
+            font-size: 22px;
+            box-shadow: 0 12px 22px rgba(169, 69, 119, 0.24);
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1100;
+            background: rgba(36, 18, 30, 0.34);
+            backdrop-filter: blur(2px);
+        }
+
+        .sidebar-overlay.is-visible {
+            display: block;
+        }
+
         .sidebar {
             position: fixed;
             top: 0;
@@ -1177,6 +1207,12 @@
         }
 
         @media (max-width: 700px) {
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
             body {
                 background: linear-gradient(180deg, #f9eef5 0%, #f5f1fb 100%);
             }
@@ -1241,6 +1277,7 @@
                 align-items: stretch;
                 padding: 14px;
                 border-radius: 14px;
+                padding-top: 56px;
             }
 
             .title-box h1 {
@@ -1367,6 +1404,9 @@
             </div>
         </div>
     </div>
+
+    <button type="button" class="mobile-menu-btn" id="mobileMenuButton" aria-label="Buka menu">&#9776;</button>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <div class="app-shell is-hidden" id="appShell">
 
@@ -1908,8 +1948,27 @@
         }
 
         function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.getElementById('main').classList.toggle('shifted');
+            const sidebar = document.getElementById('sidebar');
+            const main = document.getElementById('main');
+            const overlay = document.getElementById('sidebarOverlay');
+            const isMobile = window.matchMedia('(max-width: 700px)').matches;
+
+            sidebar.classList.toggle('active');
+
+            if (!isMobile) {
+                main.classList.toggle('shifted');
+                return;
+            }
+
+            overlay.classList.toggle('is-visible', sidebar.classList.contains('active'));
+        }
+
+        function closeSidebarOnMobile() {
+            const isMobile = window.matchMedia('(max-width: 700px)').matches;
+            if (!isMobile) return;
+
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('sidebarOverlay').classList.remove('is-visible');
         }
 
         function formatTanggal(timestamp) {
@@ -4067,6 +4126,11 @@
         document.getElementById('filterKecamatan').addEventListener('change', applyFilters);
         document.getElementById('filterIzin').addEventListener('change', applyFilters);
         document.getElementById('filterStatus').addEventListener('change', applyFilters);
+        document.getElementById('mobileMenuButton').addEventListener('click', toggleSidebar);
+        document.getElementById('sidebarOverlay').addEventListener('click', closeSidebarOnMobile);
+        document.querySelectorAll('#sidebar .menu a').forEach(function(link) {
+            link.addEventListener('click', closeSidebarOnMobile);
+        });
         document.getElementById('inputGeojsonFile').addEventListener('change', loadInputGeoJsonFromFile);
         document.getElementById('wiupKoordinatFile').addEventListener('change', loadWiupCoordinatesFromExcel);
         document.getElementById('wprKoordinatFile').addEventListener('change', loadWprAreaCoordinatesFromExcel);
