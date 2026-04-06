@@ -1,0 +1,3706 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Izin Pertambangan</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #f7e8f3, #f2eefc);
+            color: #333;
+        }
+
+        body.auth-locked {
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        body.viewer-mode .editor-only {
+            display: none !important;
+        }
+
+        .login-shell {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background:
+                radial-gradient(circle at top left, rgba(244, 127, 176, 0.24), transparent 38%),
+                radial-gradient(circle at bottom right, rgba(77, 166, 255, 0.18), transparent 34%),
+                linear-gradient(135deg, #fff5fa 0%, #f4f7ff 100%);
+        }
+
+        .login-shell.is-hidden,
+        .app-shell.is-hidden {
+            display: none;
+        }
+
+        .login-card {
+            width: min(100%, 420px);
+            background: rgba(255,255,255,0.94);
+            border: 1px solid rgba(232, 210, 224, 0.9);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 24px 46px rgba(154, 108, 133, 0.16);
+            backdrop-filter: blur(12px);
+        }
+
+        .login-brand {
+            margin-bottom: 22px;
+            text-align: center;
+        }
+
+        .login-brand span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 112px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #f47fb0 0%, #ee8fc1 100%);
+            color: white;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+        }
+
+        .login-card h2 {
+            margin: 0 0 10px;
+            font-size: 28px;
+            text-align: center;
+            color: #332b31;
+        }
+
+        .login-card p {
+            margin: 0 0 22px;
+            text-align: center;
+            color: #6f5f68;
+            line-height: 1.6;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .login-form label {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #7b6b76;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #ead7e4;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #ffffff 0%, #fff8fc 100%);
+            outline: none;
+            color: #4f4650;
+            font: inherit;
+            box-shadow: inset 0 1px 2px rgba(129, 86, 110, 0.04);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .login-form input:focus {
+            border-color: #f08bb9;
+            box-shadow: 0 0 0 4px rgba(240, 139, 185, 0.14);
+        }
+
+        .login-form button {
+            margin-top: 4px;
+        }
+
+        .login-hint {
+            margin-top: 16px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: #fff7fb;
+            border: 1px dashed #efbfd7;
+            color: #816575;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .login-error {
+            min-height: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #b42318;
+            text-align: center;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 180px;
+            height: 100vh;
+            background: linear-gradient(180deg, #f47fb0 0%, #ee8fc1 55%, #f29bc8 100%);
+            color: white;
+            transition: 0.3s;
+            z-index: 1000;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 14px 12px 18px;
+            box-shadow: 14px 0 30px rgba(205, 95, 145, 0.18);
+        }
+
+        .sidebar.active {
+            width: 180px;
+        }
+
+        .sidebar .toggle-btn {
+            width: 42px;
+            height: 42px;
+            background: rgba(255,255,255,0.16);
+            border: 1px solid rgba(255,255,255,0.22);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            backdrop-filter: blur(6px);
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .sidebar .toggle-btn:hover {
+            background: rgba(255,255,255,0.24);
+            transform: translateY(-1px);
+        }
+
+        .sidebar .brand {
+            margin: 0 0 18px 0;
+            padding: 14px 12px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.18);
+            text-align: center;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+
+        .sidebar .brand-title {
+            display: block;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            margin-bottom: 4px;
+        }
+
+        .sidebar .brand-subtitle {
+            display: block;
+            font-size: 11px;
+            color: rgba(255,255,255,0.82);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 0;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: white;
+            padding: 11px 12px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            font-size: 13px;
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.10);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            white-space: nowrap;
+            text-align: left;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+
+        .menu a:hover,
+        .menu a.active {
+            background: rgba(255,255,255,0.22);
+            border-color: rgba(255,255,255,0.28);
+            box-shadow: 0 8px 18px rgba(169, 69, 119, 0.18);
+            transform: translateX(2px);
+        }
+
+        .menu-text {
+            display: inline;
+        }
+
+        .sidebar.active .menu-text {
+            display: inline;
+        }
+
+        .main {
+            margin-left: 180px;
+            padding: 20px;
+            transition: 0.3s;
+        }
+
+        .main.shifted {
+            margin-left: 180px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            
+             /* ðŸ”¥ tambahan biar elegan */
+             background: white;
+             padding: 16px 20px;
+             border-radius: 16px;
+             box-shadow: 0 6px 18px rgba(0,0,0,0.06); 
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 9px 12px;
+            border-radius: 999px;
+            background: #fff4fa;
+            border: 1px solid #efbfd7;
+            color: #8b4b6d;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .title-box h1 {
+            margin: 0 0 6px 0;
+            font-size: 28px;
+            color: #444;
+        }
+
+        .title-box p {
+            margin: 0;
+            color: #666;
+        }
+
+        .search-box input {
+            padding: 12px 14px;
+            width: 280px;
+            max-width: 100%;
+            border: 1px solid #ead7e4;
+            border-radius: 12px;
+            outline: none;
+            background: rgba(255,255,255,0.96);
+            box-shadow: inset 0 1px 2px rgba(129, 86, 110, 0.04);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .search-box input:focus {
+            border-color: #f08bb9;
+            box-shadow: 0 0 0 4px rgba(240, 139, 185, 0.14);
+        }
+
+        .search-box {
+            position: relative;
+            width: 280px;
+            max-width: 100%;
+        }
+
+        .search-suggestions {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            z-index: 1200;
+            display: none;
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 8px 0;
+            border: 1px solid #efbfd7;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 18px 30px rgba(154, 108, 133, 0.18);
+            backdrop-filter: blur(12px);
+        }
+
+        .search-suggestions.is-visible {
+            display: block;
+        }
+
+        .search-suggestion-item {
+            width: 100%;
+            padding: 12px 14px;
+            border: 0;
+            background: transparent;
+            color: #3f3440;
+            text-align: left;
+            cursor: pointer;
+            font: inherit;
+            transition: background 0.16s ease, color 0.16s ease;
+        }
+
+        .search-suggestion-item:hover,
+        .search-suggestion-item.is-active {
+            background: linear-gradient(90deg, #3f7fe8 0%, #4d88ea 100%);
+            color: #ffffff;
+        }
+
+        .search-suggestion-empty {
+            padding: 12px 14px;
+            color: #7b6b76;
+            font-size: 14px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(255,250,253,0.98) 100%);
+            border-radius: 18px;
+            padding: 18px 20px;
+            border: 1px solid rgba(232, 210, 224, 0.9);
+            box-shadow: 0 10px 24px rgba(154, 108, 133, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #f47fb0 0%, #f5a3cb 100%);
+        }
+
+        .card .label {
+            font-size: 12px;
+            color: #7b6b76;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+        }
+
+        .card .value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #2f2a2d;
+            line-height: 1.1;
+        }
+
+        .card-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 110px;
+        }
+
+        .card-link .link-btn {
+            width: 100%;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 18px;
+            padding: 14px;
+            background: rgba(255,255,255,0.76);
+            border: 1px solid rgba(232, 210, 224, 0.9);
+            border-radius: 18px;
+            box-shadow: 0 10px 24px rgba(154, 108, 133, 0.06);
+            backdrop-filter: blur(10px);
+        }
+
+        .filters select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #ead7e4;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #ffffff 0%, #fff8fc 100%);
+            outline: none;
+            color: #4f4650;
+            font-weight: 600;
+            box-shadow: inset 0 1px 2px rgba(129, 86, 110, 0.04);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .filters select:focus {
+            border-color: #f08bb9;
+            box-shadow: 0 0 0 4px rgba(240, 139, 185, 0.14);
+            transform: translateY(-1px);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            min-width: 0;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+            padding: 16px;
+        }
+
+        #map {
+            width: 100%;
+            height: 560px;
+            border-radius: 14px;
+        }
+
+        .table-panel {
+            min-width: 0;
+        }
+
+        .input-panel {
+            min-width: 0;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(232, 210, 224, 0.9);
+            box-shadow: 0 12px 24px rgba(154, 108, 133, 0.08);
+        }
+
+        .input-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #f47fb0 0%, #f5a3cb 100%);
+        }
+
+        .input-panel h3 {
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f4e5ee;
+            font-size: 18px;
+            font-weight: 800;
+            color: #3f3440;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-group--full {
+            grid-column: 1 / -1;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #7b6b76;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #ead7e4;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #ffffff 0%, #fff8fc 100%);
+            outline: none;
+            color: #4f4650;
+            font: inherit;
+            box-shadow: inset 0 1px 2px rgba(129, 86, 110, 0.04);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            border-color: #f08bb9;
+            box-shadow: 0 0 0 4px rgba(240, 139, 185, 0.14);
+        }
+
+        .input-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .input-panel .input-group input[type="file"] {
+            padding: 16px 14px;
+            border-style: dashed;
+            border-width: 2px;
+            border-color: #efbfd7;
+            background: linear-gradient(180deg, #fffdfd 0%, #fff7fb 100%);
+        }
+
+        .input-panel .input-group input[type="file"]:hover {
+            border-color: #e8a6c7;
+            background: linear-gradient(180deg, #ffffff 0%, #fff4fa 100%);
+        }
+
+        .input-panel .input-group input[type="file"]::file-selector-button {
+            margin-right: 12px;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #f47fb0 0%, #ee8fc1 100%);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(205, 95, 145, 0.18);
+        }
+
+        .input-panel .input-group input[type="file"]::-webkit-file-upload-button {
+            margin-right: 12px;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #f47fb0 0%, #ee8fc1 100%);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(205, 95, 145, 0.18);
+        }
+
+        .input-help {
+            margin: 10px 0 14px;
+            font-size: 12px;
+            color: #7b6b76;
+            line-height: 1.6;
+            background: #fff7fb;
+            border: 1px dashed #efbfd7;
+            border-radius: 12px;
+            padding: 10px 12px;
+        }
+
+        .input-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid #f4e5ee;
+        }
+
+        .primary-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 11px 16px;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(90deg, #f47fb0 0%, #ee8fc1 100%);
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(205, 95, 145, 0.18);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 22px rgba(205, 95, 145, 0.24);
+        }
+
+        .form-status {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .form-status.is-error {
+            color: #b42318;
+        }
+
+        .form-status.is-success {
+            color: #027a48;
+        }
+
+        .preview-panel {
+            min-width: 0;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(232, 210, 224, 0.9);
+            box-shadow: 0 12px 24px rgba(154, 108, 133, 0.08);
+        }
+
+        .preview-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #f08bb9 0%, #f4b6d3 100%);
+        }
+
+        .preview-panel h3 {
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f4e5ee;
+            font-size: 18px;
+            font-weight: 800;
+            color: #3f3440;
+        }
+
+        .preview-panel .input-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .preview-panel .input-group label {
+            color: #8a6d7d;
+        }
+
+        .preview-panel .input-group input[type="file"] {
+            padding: 16px 14px;
+            border-style: dashed;
+            border-width: 2px;
+            border-color: #efbfd7;
+            background: linear-gradient(180deg, #fffdfd 0%, #fff7fb 100%);
+        }
+
+        .preview-panel .input-group input[type="file"]:hover {
+            border-color: #e8a6c7;
+            background: linear-gradient(180deg, #ffffff 0%, #fff4fa 100%);
+        }
+
+        .preview-panel .input-group input[type="file"]::file-selector-button {
+            margin-right: 12px;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #f47fb0 0%, #ee8fc1 100%);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(205, 95, 145, 0.18);
+        }
+
+        .preview-panel .input-group input[type="file"]::-webkit-file-upload-button {
+            margin-right: 12px;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #f47fb0 0%, #ee8fc1 100%);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(205, 95, 145, 0.18);
+        }
+
+        .outline-btn {
+            border: 1px solid #efbfd7;
+            border-radius: 12px;
+            padding: 11px 18px;
+            font-weight: 700;
+            color: #a34372;
+            background: linear-gradient(180deg, #fffdfd 0%, #fff4fa 100%);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .outline-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(205, 95, 145, 0.12);
+            border-color: #eaa4c8;
+        }
+
+        .link-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border-radius: 12px;
+            padding: 11px 18px;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(90deg, #f47fb0 0%, #ee8fc1 100%);
+            box-shadow: 0 10px 18px rgba(205, 95, 145, 0.18);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .link-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 22px rgba(205, 95, 145, 0.24);
+        }
+
+        .preview-panel .input-help {
+            margin-top: 14px;
+            margin-bottom: 0;
+            background: linear-gradient(180deg, #fffafc 0%, #fff6fa 100%);
+            border-color: #efc4d8;
+            color: #816575;
+        }
+
+        .preview-panel .input-actions {
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid #f4e5ee;
+        }
+
+        .preview-panel .form-status {
+            flex: 1;
+            min-width: 220px;
+            color: #6f5f68;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid #f0d7e5;
+            border-radius: 14px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+            font-size: 13px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #f3e7ee;
+            vertical-align: top;
+        }
+
+        .data-table th {
+            background: #fff5fa;
+            color: #555;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background: #fffafd;
+        }
+
+        .data-table tbody tr:hover {
+            background: #fff1f7;
+        }
+
+        .data-table tbody tr.row-expiring {
+            background: #fff8eb;
+        }
+
+        .data-table tbody tr.row-expiring:hover {
+            background: #fff2d8;
+        }
+
+        .expiry-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+
+        .expiry-badge--warning {
+            background: #fff0c7;
+            color: #8a5a00;
+        }
+
+        .expiry-badge--expired {
+            background: #ffe0dc;
+            color: #b42318;
+        }
+
+        .expiry-badge--default {
+            background: #f3f4f6;
+            color: #667085;
+        }
+
+        .empty-table {
+            padding: 18px;
+            text-align: center;
+            color: #777;
+            font-size: 14px;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+        }
+
+        .chart-wrap--compact {
+            height: 220px;
+        }
+
+        .chart-wrap--medium {
+            height: 280px;
+        }
+
+        .chart-wrap--bar {
+            height: 340px;
+        }
+
+        .panel h3 {
+            margin-top: 0;
+            margin-bottom: 14px;
+            font-size: 16px;
+            color: #444;
+        }
+
+        .map-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .map-header h3 {
+            margin: 0;
+        }
+
+        .legend-inline {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .map-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .map-status {
+            font-size: 12px;
+            font-weight: 600;
+            color: #7b6b76;
+        }
+
+        .legend-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .footer {
+            margin-top: 20px;
+            background: #FE9EC7;
+            color: white;
+            text-align: center;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 14px;
+        }
+
+        .leaflet-popup-content {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .popup-card {
+            min-width: 240px;
+            padding: 12px 14px;
+            border-radius: 12px;
+        }
+
+        .popup-title {
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .popup-status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .popup-rkab-box {
+            margin: 0 0 12px 0;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.72);
+            border: 1px dashed rgba(77, 166, 255, 0.55);
+        }
+
+        .popup-rkab-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #5b6670;
+            margin-bottom: 4px;
+        }
+
+        .popup-rkab-value {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #2f3e4d;
+        }
+
+        .popup-location-line {
+            margin-bottom: 2px;
+        }
+
+        .popup-photo {
+            display: block;
+            width: 100%;
+            max-width: 280px;
+            margin-top: 12px;
+            border-radius: 12px;
+            border: 1px solid #edd3e1;
+            box-shadow: 0 10px 18px rgba(154, 108, 133, 0.12);
+        }
+
+        .coord-format-toggle {
+            display: inline-flex;
+            gap: 8px;
+            padding: 6px;
+            border-radius: 14px;
+            background: #fff6fa;
+            border: 1px solid #efbfd7;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .coord-format-toggle button {
+            border: none;
+            border-radius: 10px;
+            padding: 9px 14px;
+            font-weight: 700;
+            color: #8b4b6d;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .coord-format-toggle button.is-active {
+            color: white;
+            background: linear-gradient(90deg, #f47fb0 0%, #ee8fc1 100%);
+            box-shadow: 0 8px 16px rgba(205, 95, 145, 0.18);
+        }
+
+        .coord-panel {
+            display: none;
+        }
+
+        .coord-panel.is-active {
+            display: block;
+        }
+
+        .dms-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(70px, 1fr));
+            gap: 10px;
+        }
+
+        .table-action-btn {
+            border: none;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-weight: 700;
+            color: white;
+            background: #d92d20;
+            cursor: pointer;
+        }
+
+        .table-action-btn:hover {
+            background: #b42318;
+        }
+
+        .peti-photo-link {
+            color: #a34372;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .peti-photo-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 1100px) {
+            .sidebar {
+                width: 160px;
+                padding: 12px 10px 16px;
+            }
+
+            .main,
+            .main.shifted {
+                margin-left: 160px;
+                padding: 16px;
+            }
+
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .cards {
+                grid-template-columns: repeat(2, minmax(180px, 1fr));
+            }
+
+            .filters {
+                grid-template-columns: repeat(2, minmax(180px, 1fr));
+            }
+
+            .map-header {
+                align-items: flex-start;
+            }
+
+            .legend-inline {
+                justify-content: flex-start;
+            }
+
+            #map {
+                height: 480px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            body {
+                background: linear-gradient(180deg, #f9eef5 0%, #f5f1fb 100%);
+            }
+
+            .sidebar {
+                width: min(82vw, 280px);
+                transform: translateX(-100%);
+                box-shadow: 18px 0 34px rgba(205, 95, 145, 0.22);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main,
+            .main.shifted {
+                margin-left: 0;
+                padding: 12px;
+            }
+
+            .panel {
+                padding: 14px;
+                border-radius: 16px;
+            }
+
+            .cards,
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .cards {
+                gap: 12px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .card .value {
+                font-size: 28px;
+            }
+
+            .filters {
+                gap: 10px;
+                padding: 12px;
+            }
+
+            .filters select {
+                min-height: 46px;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 14px;
+                border-radius: 14px;
+            }
+
+            .title-box h1 {
+                font-size: 24px;
+            }
+
+            .title-box p {
+                font-size: 14px;
+            }
+
+            .map-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .map-actions {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+            .map-actions .outline-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .map-status {
+                line-height: 1.5;
+            }
+
+            .legend-inline {
+                justify-content: flex-start;
+                gap: 10px;
+            }
+
+            .legend-item {
+                font-size: 13px;
+            }
+
+            #map {
+                height: 360px;
+                border-radius: 12px;
+            }
+
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .input-group input,
+            .input-group select,
+            .input-group textarea {
+                min-height: 46px;
+            }
+
+            .input-group textarea {
+                min-height: 120px;
+            }
+
+            .input-actions,
+            .preview-panel .input-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .primary-btn,
+            .outline-btn,
+            .link-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .preview-panel .form-status,
+            .form-status {
+                min-width: 0;
+            }
+
+            .table-wrap {
+                border-radius: 12px;
+            }
+
+            .data-table {
+                min-width: 720px;
+                font-size: 12px;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 8px 10px;
+            }
+
+            .footer {
+                margin-top: 16px;
+                padding: 12px;
+                font-size: 12px;
+                line-height: 1.6;
+            }
+        }
+    </style>
+</head>
+<body class="auth-locked">
+
+    <div class="login-shell" id="loginScreen">
+        <div class="login-card">
+            <div class="login-brand">
+                <span>MINERBA</span>
+            </div>
+            <h2>Masuk Dashboard</h2>
+            <p>Silakan login terlebih dahulu untuk membuka dashboard izin pertambangan Cabang Dinas Wilayah V.</p>
+            <form class="login-form" id="loginForm">
+                <label for="loginUsername">
+                    Username
+                    <input type="text" id="loginUsername" autocomplete="username" placeholder="Masukkan username">
+                </label>
+                <label for="loginPassword">
+                    Password
+                    <input type="password" id="loginPassword" autocomplete="current-password" placeholder="Masukkan password">
+                </label>
+                <div class="login-error" id="loginError"></div>
+                <button type="submit" class="primary-btn">Masuk</button>
+            </form>
+            <div class="login-hint">
+                Akun `reviewer` hanya dapat melihat data. Akun `editor` dapat menambah dan menghapus data. Saat ini login disimpan di browser agar pengguna tidak perlu masuk ulang setiap reload.
+            </div>
+        </div>
+    </div>
+
+    <div class="app-shell is-hidden" id="appShell">
+
+    <div class="sidebar" id="sidebar">
+        <button class="toggle-btn" onclick="toggleSidebar()">â˜°</button>
+        <div class="brand">
+            <span class="brand-title">MINERBA</span>
+            <span class="brand-subtitle">Dashboard Wilayah V</span>
+        </div>
+
+        <div class="menu">
+            <a href="#main">Dashboard</a>
+            <a href="#map-panel">Peta</a>
+            <a href="#table-panel">Atribut IUP</a>
+            <a href="#sipb-table-panel">Atribut SIPB</a>
+            <a href="#wpr-table-panel">Atribut WPR</a>
+            <a href="#peti-table-panel">Atribut PETI</a>
+            <a href="#peti-input-panel" class="editor-only">Input PETI</a>
+            <a href="#input-panel" class="editor-only">Input Polygon</a>
+            <a href="#wiup-upload-panel">Upload WIUP</a>
+            <a href="#wpr-check-panel">Upload WPR</a>
+            <a href="#chart-panel">Data</a>
+        </div>
+    </div>
+
+    <div class="main" id="main">
+        <div class="topbar">
+            <div class="title-box">
+                <h1>Data Izin Pertambangan</h1>
+                <p>Dashboard Izin Pertambangan Cabang Dinas Wilayah V</p>
+            </div>
+
+            <div class="topbar-actions">
+                <span class="role-badge" id="roleBadge">Mode Review</span>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Cari nama perusahaan...">
+                    <div class="search-suggestions" id="searchSuggestions"></div>
+                </div>
+                <button type="button" class="outline-btn" id="logoutButton">Logout</button>
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <div class="label">Total Izin</div>
+                <div class="value" id="totalIzin">0</div>
+            </div>
+            <div class="card">
+                <div class="label">Total Luas (Ha)</div>
+                <div class="value" id="totalLuas">0</div>
+            </div>
+            <div class="card card-link">
+                <a
+                    class="link-btn"
+                    href="https://drive.google.com/drive/folders/1Hljui9ueOhJRHggtQDcjgLcPDvJlBJD1?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Buka Database Izin Pertambangan
+                </a>
+            </div>
+        </div>
+
+        <div class="filters">
+            <select id="filterKabupaten">
+                <option value="">Semua Kabupaten</option>
+            </select>
+
+            <select id="filterKecamatan">
+                <option value="">Semua Kecamatan</option>
+            </select>
+
+            <select id="filterIzin">
+                <option value="">Semua Jenis Feature</option>
+            </select>
+
+            <select id="filterStatus">
+                <option value="">Semua Status</option>
+            </select>
+        </div>
+
+        <div class="content">
+            <div class="left-panel">
+                <div class="panel" id="map-panel">
+                    <div class="map-header">
+                        <h3>Peta Izin Pertambangan</h3>
+                        <div class="map-actions">
+                            <button type="button" class="outline-btn" id="locateMeButton">Lokasi Saya</button>
+                            <button type="button" class="outline-btn" id="clearLocationButton">Sembunyikan Lokasi</button>
+                            <span class="map-status" id="mapLocationStatus">Klik tombol untuk menampilkan lokasi saat ini.</span>
+                            <div class="legend-inline">
+                                <span class="legend-title">Legenda</span>
+                                <div class="legend-item"><span class="legend-color" style="background:#ff4fa3;"></span> SIPB</div>
+                                <div class="legend-item"><span class="legend-color" style="background:#4da6ff;"></span> IUP OP</div>
+                                <div class="legend-item"><span class="legend-color" style="background:#00c27a;"></span> IUP Eksplorasi</div>
+                                <div class="legend-item"><span class="legend-color" style="background:#9b59b6;"></span> WPR</div>
+                                <div class="legend-item"><span class="legend-color" style="background:#d92d20;"></span> PETI</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="map"></div>
+                </div>
+
+                <div class="panel table-panel" id="table-panel">
+                    <h3>Atribut IUP</h3>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>Komoditas</th>
+                                    <th>Jenis Izin</th>
+                                    <th>Status</th>
+                                    <th>Kabupaten</th>
+                                    <th>Kecamatan</th>
+                                    <th>Desa</th>
+                                    <th>Luas Area (Ha)</th>
+                                    <th>Nomor SK</th>
+                                    <th>Tanggal SK</th>
+                                    <th>Masa Berlaku</th>
+                                    <th>Penanda</th>
+                                </tr>
+                            </thead>
+                            <tbody id="polygonTableBody">
+                                <tr>
+                                    <td colspan="12" class="empty-table">Memuat data izin...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel table-panel" id="sipb-table-panel">
+                    <h3>Atribut SIPB</h3>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>Komoditas</th>
+                                    <th>Status</th>
+                                    <th>Kabupaten</th>
+                                    <th>Kecamatan</th>
+                                    <th>Desa</th>
+                                    <th>Luas Area (Ha)</th>
+                                    <th>Nomor SK</th>
+                                    <th>Tanggal SK</th>
+                                    <th>Masa Berlaku</th>
+                                    <th>Dokumen Teknis</th>
+                                    <th>Penanda</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sipbTableBody">
+                                <tr>
+                                    <td colspan="12" class="empty-table">Memuat data SIPB...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel table-panel" id="wpr-table-panel">
+                    <h3>Atribut WPR</h3>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead id="wprTableHead">
+                                <tr>
+                                    <th>Memuat kolom WPR...</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wprTableBody">
+                                <tr>
+                                    <td class="empty-table">Memuat data WPR...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel table-panel" id="peti-table-panel">
+                    <h3>Atribut PETI</h3>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nama/Lokasi</th>
+                                    <th>Komoditas</th>
+                                    <th>Sumber Data</th>
+                                    <th>Tanggal</th>
+                                    <th>Longitude (X)</th>
+                                    <th>Latitude (Y)</th>
+                                    <th>Foto</th>
+                                    <th>Keterangan</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="petiTableBody">
+                                <tr>
+                                    <td colspan="9" class="empty-table">Belum ada titik PETI yang diinput.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel input-panel editor-only" id="peti-input-panel">
+                    <h3>Input Titik PETI</h3>
+                    <div class="coord-format-toggle">
+                        <button type="button" class="is-active" data-format="dd" id="petiFormatDdButton">Decimal Degree</button>
+                        <button type="button" data-format="dms" id="petiFormatDmsButton">DMS</button>
+                    </div>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label for="petiNama">Nama/Lokasi PETI</label>
+                            <input type="text" id="petiNama" placeholder="Contoh: PETI Pandan">
+                        </div>
+                        <div class="input-group">
+                            <label for="petiKomoditas">Komoditas</label>
+                            <select id="petiKomoditas">
+                                <option value="">Pilih Komoditas</option>
+                                <option value="Mineral Logam">Mineral Logam</option>
+                                <option value="Mineral Bukan Logam">Mineral Bukan Logam</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="petiSumber">Sumber Data</label>
+                            <select id="petiSumber">
+                                <option value="">Pilih Sumber Data</option>
+                                <option value="Pengaduan Masyarakat">Pengaduan Masyarakat</option>
+                                <option value="Kepolisian">Kepolisian</option>
+                                <option value="Pemerintah Daerah">Pemerintah Daerah</option>
+                                <option value="Sumber Lain">Sumber Lain</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="petiTanggal">Tanggal Data</label>
+                            <input type="date" id="petiTanggal">
+                        </div>
+                        <div class="input-group input-group--full coord-panel is-active" id="petiDdPanel">
+                            <div class="input-grid">
+                                <div class="input-group">
+                                    <label for="petiLongitudeDd">Koordinat X / Longitude (Decimal Degree)</label>
+                                    <input type="number" id="petiLongitudeDd" step="0.000001" placeholder="98.852876">
+                                </div>
+                                <div class="input-group">
+                                    <label for="petiLatitudeDd">Koordinat Y / Latitude (Decimal Degree)</label>
+                                    <input type="number" id="petiLatitudeDd" step="0.000001" placeholder="1.715991">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group input-group--full coord-panel" id="petiDmsPanel">
+                            <div class="input-grid">
+                                <div class="input-group">
+                                    <label>Koordinat X / Longitude (DMS)</label>
+                                    <div class="dms-grid">
+                                        <input type="number" id="petiLongitudeDeg" placeholder="98">
+                                        <input type="number" id="petiLongitudeMin" placeholder="51">
+                                        <input type="number" id="petiLongitudeSec" step="0.01" placeholder="10.35">
+                                        <select id="petiLongitudeHemisphere">
+                                            <option value="E">E</option>
+                                            <option value="W">W</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label>Koordinat Y / Latitude (DMS)</label>
+                                    <div class="dms-grid">
+                                        <input type="number" id="petiLatitudeDeg" placeholder="1">
+                                        <input type="number" id="petiLatitudeMin" placeholder="42">
+                                        <input type="number" id="petiLatitudeSec" step="0.01" placeholder="57.57">
+                                        <select id="petiLatitudeHemisphere">
+                                            <option value="N">N</option>
+                                            <option value="S">S</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group input-group--full">
+                            <label for="petiKeterangan">Keterangan</label>
+                            <textarea id="petiKeterangan" placeholder="Catatan tambahan lokasi PETI, akses, kondisi lapangan, atau temuan lainnya."></textarea>
+                        </div>
+                        <div class="input-group input-group--full">
+                            <label for="petiFoto">Upload Foto</label>
+                            <input type="file" id="petiFoto" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="input-help">
+                        Pada GitHub Pages, titik PETI bawaan dibaca dari file dashboard. Perubahan editor yang ditambahkan atau dihapus akan tersimpan di browser ini.
+                    </div>
+                    <div class="input-actions">
+                        <button type="button" class="primary-btn" id="savePetiButton">Simpan Titik PETI</button>
+                        <span class="form-status" id="petiFormStatus">Masukkan koordinat X,Y dalam Decimal Degree atau DMS, lalu simpan titik PETI.</span>
+                    </div>
+                </div>
+
+                <div class="panel input-panel editor-only" id="input-panel">
+                    <h3>Input Polygon Koordinat</h3>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label for="inputNama">Nama</label>
+                            <input type="text" id="inputNama" placeholder="Contoh: PT Contoh Mineral">
+                        </div>
+                        <div class="input-group">
+                            <label for="inputIzin">Jenis Izin</label>
+                            <select id="inputIzin">
+                                <option value="SIPB">SIPB</option>
+                                <option value="IUP OP">IUP OP</option>
+                                <option value="IUP Eksplorasi">IUP Eksplorasi</option>
+                                <option value="WPR">WPR</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="inputStatus">Status</label>
+                            <select id="inputStatus">
+                                <option value="Aktif">Aktif</option>
+                                <option value="Dalam Proses">Dalam Proses</option>
+                                <option value="Masa Berlaku Habis">Masa Berlaku Habis</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="inputKomoditas">Komoditas</label>
+                            <input type="text" id="inputKomoditas" placeholder="Contoh: Pasir">
+                        </div>
+                        <div class="input-group">
+                            <label for="inputKabupaten">Kabupaten</label>
+                            <input type="text" id="inputKabupaten">
+                        </div>
+                        <div class="input-group">
+                            <label for="inputKecamatan">Kecamatan</label>
+                            <input type="text" id="inputKecamatan">
+                        </div>
+                        <div class="input-group">
+                            <label for="inputDesa">Desa</label>
+                            <input type="text" id="inputDesa">
+                        </div>
+                        <div class="input-group">
+                            <label for="inputArea">Luas Area (Ha)</label>
+                            <input type="number" id="inputArea" step="0.01" min="0" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label for="inputNomorSk">Nomor SK</label>
+                            <input type="text" id="inputNomorSk">
+                        </div>
+                        <div class="input-group">
+                            <label for="inputTanggalSk">Tanggal SK</label>
+                            <input type="date" id="inputTanggalSk">
+                        </div>
+                        <div class="input-group">
+                            <label for="inputMasa">Masa Berlaku</label>
+                            <input type="text" id="inputMasa" placeholder="Contoh: 3 Tahun">
+                        </div>
+                        <div class="input-group input-group--full">
+                            <label for="inputKoordinatFile">File Excel Koordinat</label>
+                            <input type="file" id="inputKoordinatFile" accept=".xlsx,.xls">
+                        </div>
+                    </div>
+                    <div class="input-help">
+                        File Excel contoh yang kamu kirim terbaca dengan kolom `No`, `X`, dan `Y`. Upload file `.xlsx/.xls` dengan pola itu, dan polygon akan dibentuk otomatis dari koordinat di file.
+                    </div>
+                    <div class="input-actions">
+                        <button type="button" class="primary-btn" id="addPolygonButton">Tambah Polygon</button>
+                        <span class="form-status" id="inputFormStatus">Polygon yang ditambahkan akan tampil di peta pada sesi ini.</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="right-panel">
+                <div class="panel preview-panel" id="wiup-upload-panel">
+                    <h3>Upload Koordinat WIUP</h3>
+                    <div class="input-grid">
+                        <div class="input-group input-group--full">
+                            <label for="wiupKoordinatFile">File Excel Koordinat WIUP</label>
+                            <input type="file" id="wiupKoordinatFile" accept=".xlsx,.xls">
+                        </div>
+                    </div>
+                    <div class="input-help">
+                        Upload file Excel dengan format kolom `No`, `X`, dan `Y`. Polygon hanya akan ditampilkan sebagai preview di peta dan tidak disimpan ke database atau data utama dashboard.
+                    </div>
+                    <div class="input-actions">
+                        <button type="button" class="outline-btn" id="checkWiupButton">Cek Koordinat WIUP</button>
+                        <span class="form-status" id="wiupFormStatus">Belum ada polygon WIUP yang dipreview.</span>
+                    </div>
+                </div>
+
+                <div class="panel preview-panel" id="wpr-check-panel">
+                    <h3>Upload Koordinat WPR</h3>
+                    <div class="input-grid">
+                        <div class="input-group input-group--full">
+                            <label for="wprKoordinatFile">File Excel Koordinat Area WPR</label>
+                            <input type="file" id="wprKoordinatFile" accept=".xlsx,.xls">
+                        </div>
+                    </div>
+                    <div class="input-help">
+                        Upload file Excel dengan format kolom `No`, `X`, dan `Y`. Polygon hanya akan dipreview di peta, lalu dicek apakah berada di dalam area polygon WPR yang tersedia.
+                    </div>
+                    <div class="input-actions">
+                        <button type="button" class="outline-btn" id="checkWprAreaButton">Cek Area WPR</button>
+                        <span class="form-status" id="wprAreaFormStatus">Belum ada polygon area WPR yang dipreview.</span>
+                    </div>
+                </div>
+
+                <div class="panel panel-wide" id="chart-panel">
+                    <h3>Jenis Izin</h3>
+                    <div class="chart-wrap chart-wrap--medium">
+                        <canvas id="izinChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Status Izin</h3>
+                    <div class="chart-wrap chart-wrap--compact">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Status RKAB (IUP OP dan Eksplorasi) Tahun 2026</h3>
+                    <div class="chart-wrap chart-wrap--compact">
+                        <canvas id="rkabChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Dokumen Teknis Rencana Penambangan SIPB</h3>
+                    <div class="chart-wrap chart-wrap--compact">
+                        <canvas id="dokTeknisChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="panel panel-wide">
+                    <h3>Analisis Jenis Komoditas</h3>
+                    <div class="chart-wrap chart-wrap--bar">
+                        <canvas id="komoditasBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Cabang Dinas Energi dan Sumber Daya Mineral Wilayah V | Jl. Raja Inal Siregar, Gg. Otoayana, Padangsidimpuan | Email: cabdiswilayahv@gmail.com | Kode Pos: 22733
+        </div>
+    </div>
+    </div>
+
+    <script>
+        const LOGIN_STORAGE_KEY = 'dashboardMinerbaSession';
+        const PETI_STATIC_DATA_URL = 'data/peti_points.json';
+        const PETI_LOCAL_ADDED_KEY = 'dashboardMinerbaPetiAdded';
+        const PETI_LOCAL_DELETED_KEY = 'dashboardMinerbaPetiDeleted';
+        const LOGIN_CREDENTIALS = [
+            {
+                username: 'reviewer',
+                password: 'review2026',
+                role: 'viewer',
+                label: 'Mode Review'
+            },
+            {
+                username: 'editor',
+                password: 'editor2026',
+                role: 'editor',
+                label: 'Mode Edit'
+            }
+        ];
+
+        let map = L.map('map').setView([1.5, 99], 7);
+        let geoLayer = null;
+        let allData = null;
+        let izinChart = null;
+        let statusChart = null;
+        let rkabChart = null;
+        let dokTeknisChart = null;
+        let komoditasBarChart = null;
+        let customFeatureId = 100000;
+        let uploadedCoordinates = null;
+        let wiupPreviewCoordinates = null;
+        let wiupPreviewLayer = null;
+        let wprAreaPreviewCoordinates = null;
+        let wprAreaPreviewLayer = null;
+        let currentLocationMarker = null;
+        let currentLocationAccuracy = null;
+        let petiMarkerLayer = null;
+        let petiPoints = [];
+        let petiCoordinateFormat = 'dd';
+        let currentUserRole = 'viewer';
+        let petiSyncIntervalId = null;
+        let petiSyncInFlight = false;
+        let petiDataSignature = '[]';
+        let searchSuggestionIndex = -1;
+        let baseMaps = {
+            'OpenStreetMap': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap'
+            }),
+            'Carto Light': L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }),
+            'Esri Satelit': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri'
+            }),
+            'OpenTopoMap': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data &copy; OpenStreetMap contributors, SRTM | Map style &copy; OpenTopoMap',
+                maxZoom: 17
+            })
+        };
+
+        baseMaps['OpenStreetMap'].addTo(map);
+        L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
+        initializePetiData();
+
+        function showDashboardAfterLogin() {
+            document.body.classList.remove('auth-locked');
+            document.getElementById('loginScreen').classList.add('is-hidden');
+            document.getElementById('appShell').classList.remove('is-hidden');
+
+            window.setTimeout(() => {
+                map.invalidateSize();
+                if (geoLayer && geoLayer.getBounds().isValid()) {
+                    map.fitBounds(geoLayer.getBounds(), { padding: [20, 20] });
+                }
+            }, 150);
+        }
+
+        function isEditor() {
+            return currentUserRole === 'editor';
+        }
+
+        function requireEditorAccess() {
+            if (isEditor()) return true;
+            setPetiFormStatus('Akun review hanya dapat melihat data. Gunakan akun editor untuk mengubah data.', 'error');
+            setInputFormStatus('Akun review hanya dapat melihat data. Gunakan akun editor untuk mengubah data.', 'error');
+            return false;
+        }
+
+        function applyRoleAccess() {
+            document.body.classList.toggle('viewer-mode', !isEditor());
+            const roleBadge = document.getElementById('roleBadge');
+            roleBadge.textContent = isEditor() ? 'Mode Edit' : 'Mode Review';
+        }
+
+        function showLoginScreen() {
+            document.body.classList.add('auth-locked');
+            document.body.classList.remove('viewer-mode');
+            document.getElementById('loginScreen').classList.remove('is-hidden');
+            document.getElementById('appShell').classList.add('is-hidden');
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginError').textContent = '';
+        }
+
+        function initializeLogin() {
+            let savedSession = null;
+            try {
+                savedSession = JSON.parse(localStorage.getItem(LOGIN_STORAGE_KEY) || 'null');
+            } catch (error) {
+                savedSession = null;
+            }
+
+            document.getElementById('loginForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                const username = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value;
+                const errorEl = document.getElementById('loginError');
+
+                const matchedUser = LOGIN_CREDENTIALS.find(account => {
+                    return username === account.username && password === account.password;
+                });
+
+                if (matchedUser) {
+                    currentUserRole = matchedUser.role;
+                    localStorage.setItem(LOGIN_STORAGE_KEY, JSON.stringify({
+                        username: matchedUser.username,
+                        role: matchedUser.role
+                    }));
+                    errorEl.textContent = '';
+                    applyRoleAccess();
+                    showDashboardAfterLogin();
+                    return;
+                }
+
+                errorEl.textContent = 'Username atau password salah.';
+            });
+
+            document.getElementById('logoutButton').addEventListener('click', function() {
+                localStorage.removeItem(LOGIN_STORAGE_KEY);
+                currentUserRole = 'viewer';
+                showLoginScreen();
+            });
+
+            if (savedSession && (savedSession.role === 'viewer' || savedSession.role === 'editor')) {
+                currentUserRole = savedSession.role;
+                applyRoleAccess();
+                showDashboardAfterLogin();
+            } else {
+                showLoginScreen();
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('main').classList.toggle('shifted');
+        }
+
+        function formatTanggal(timestamp) {
+            if (!timestamp) return '-';
+            const date = new Date(timestamp);
+            if (isNaN(date.getTime())) return '-';
+            return date.toLocaleDateString('id-ID');
+        }
+
+        function getIzinColor(izin) {
+            const warnaIzin = {
+                'SIPB': '#ff4fa3',
+                'IUP OP': '#4da6ff',
+                'IUP Eksplorasi': '#00c27a',
+                'WPR': '#9b59b6'
+            };
+
+            return warnaIzin[(izin || '').trim()] || '#999999';
+        }
+
+        function getStatusTheme(status) {
+            const normalizedStatus = (status || '').trim().toLowerCase();
+
+            if (normalizedStatus === 'aktif') {
+                return {
+                    background: '#ebfff5',
+                    border: '#00c27a',
+                    boxBackground: '#dcfce7',
+                    boxBorder: '#00c27a',
+                    boxLabel: '#15803d',
+                    boxValue: '#14532d',
+                    badgeBackground: '#00c27a',
+                    badgeText: '#ffffff'
+                };
+            }
+
+            if (normalizedStatus === 'dalam proses') {
+                return {
+                    background: '#eef7ff',
+                    border: '#6ec1ff',
+                    boxBackground: '#e3f2ff',
+                    boxBorder: '#6ec1ff',
+                    boxLabel: '#2f86c8',
+                    boxValue: '#1f4666',
+                    badgeBackground: '#6ec1ff',
+                    badgeText: '#ffffff'
+                };
+            }
+
+            if (normalizedStatus === 'masa berlaku habis') {
+                return {
+                    background: '#fff0ef',
+                    border: '#ff3b30',
+                    boxBackground: '#ffe2e0',
+                    boxBorder: '#ff3b30',
+                    boxLabel: '#d9362c',
+                    boxValue: '#5c1f1c',
+                    badgeBackground: '#ff3b30',
+                    badgeText: '#ffffff'
+                };
+            }
+
+            return {
+                background: '#f4f5f7',
+                border: '#d0d5dd',
+                boxBackground: '#ffffff',
+                boxBorder: '#d0d5dd',
+                boxLabel: '#5b6670',
+                boxValue: '#2f3e4d',
+                badgeBackground: '#6c757d',
+                badgeText: '#ffffff'
+            };
+        }
+
+        function getPolygonColor(feature) {
+            const izin = (feature.properties.Izin || '').trim();
+            return getIzinColor(izin);
+        }
+
+        function fillSelect(selectId, values, label) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = `<option value="">${label}</option>`;
+
+            [...values].sort((a, b) => a.localeCompare(b, 'id')).forEach(value => {
+                if (value !== null && value !== undefined && String(value).trim() !== '') {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        function populateFilters(data) {
+            const kabupatenSet = new Set();
+            const kecamatanSet = new Set();
+            const izinSet = new Set();
+            const statusSet = new Set();
+
+            data.features.forEach(feature => {
+                kabupatenSet.add(feature.properties.Kabupaten || '');
+                kecamatanSet.add(feature.properties.Kecamatan || '');
+                izinSet.add(feature.properties.Izin || '');
+                statusSet.add(feature.properties.Status || '');
+            });
+
+            izinSet.add('PETI');
+
+            fillSelect('filterKabupaten', kabupatenSet, 'Semua Kabupaten');
+            fillSelect('filterKecamatan', kecamatanSet, 'Semua Kecamatan');
+            fillSelect('filterIzin', izinSet, 'Semua Jenis Feature');
+            fillSelect('filterStatus', statusSet, 'Semua Status');
+        }
+
+        function refreshFiltersPreserveSelection() {
+            const currentValues = {
+                filterKabupaten: document.getElementById('filterKabupaten').value,
+                filterKecamatan: document.getElementById('filterKecamatan').value,
+                filterIzin: document.getElementById('filterIzin').value,
+                filterStatus: document.getElementById('filterStatus').value
+            };
+
+            populateFilters(allData);
+
+            Object.entries(currentValues).forEach(([id, value]) => {
+                const select = document.getElementById(id);
+                if ([...select.options].some(option => option.value === value)) {
+                    select.value = value;
+                }
+            });
+        }
+
+        function getSearchSuggestions(keyword) {
+            const normalizedKeyword = String(keyword || '').trim().toLowerCase();
+            if (!normalizedKeyword) return [];
+
+            const allNames = [];
+
+            if (allData && Array.isArray(allData.features)) {
+                allData.features.forEach(feature => {
+                    const name = String(feature?.properties?.Nama || '').trim();
+                    if (name) {
+                        allNames.push(name);
+                    }
+                });
+            }
+
+            petiPoints.forEach(point => {
+                const name = String(point?.nama || '').trim();
+                if (name) {
+                    allNames.push(name);
+                }
+            });
+
+            return [...new Set(allNames)]
+                .filter(name => name.toLowerCase().includes(normalizedKeyword))
+                .sort((a, b) => a.localeCompare(b, 'id'))
+                .slice(0, 8);
+        }
+
+        function closeSearchSuggestions() {
+            const suggestionsEl = document.getElementById('searchSuggestions');
+            suggestionsEl.classList.remove('is-visible');
+            suggestionsEl.innerHTML = '';
+            searchSuggestionIndex = -1;
+        }
+
+        function applySearchSuggestion(value) {
+            document.getElementById('searchInput').value = value;
+            closeSearchSuggestions();
+            applyFilters();
+        }
+
+        function updateSearchSuggestionActiveItem() {
+            const items = [...document.querySelectorAll('.search-suggestion-item')];
+            items.forEach((item, index) => {
+                item.classList.toggle('is-active', index === searchSuggestionIndex);
+            });
+        }
+
+        function renderSearchSuggestions(keyword) {
+            const suggestionsEl = document.getElementById('searchSuggestions');
+            const suggestions = getSearchSuggestions(keyword);
+
+            if (!String(keyword || '').trim()) {
+                closeSearchSuggestions();
+                return;
+            }
+
+            if (!suggestions.length) {
+                suggestionsEl.innerHTML = '<div class="search-suggestion-empty">Data tidak ditemukan.</div>';
+                suggestionsEl.classList.add('is-visible');
+                searchSuggestionIndex = -1;
+                return;
+            }
+
+            suggestionsEl.innerHTML = suggestions.map((suggestion, index) => `
+                <button
+                    type="button"
+                    class="search-suggestion-item${index === 0 ? ' is-active' : ''}"
+                    data-search-suggestion="${safeHtml(suggestion)}"
+                >${safeHtml(suggestion)}</button>
+            `).join('');
+
+            suggestionsEl.classList.add('is-visible');
+            searchSuggestionIndex = 0;
+        }
+
+        function setInputFormStatus(message, type) {
+            const statusEl = document.getElementById('inputFormStatus');
+            statusEl.textContent = message;
+            statusEl.className = 'form-status';
+
+            if (type === 'error') statusEl.classList.add('is-error');
+            if (type === 'success') statusEl.classList.add('is-success');
+        }
+
+        function setWiupFormStatus(message, type) {
+            const statusEl = document.getElementById('wiupFormStatus');
+            statusEl.textContent = message;
+            statusEl.className = 'form-status';
+
+            if (type === 'error') statusEl.classList.add('is-error');
+            if (type === 'success') statusEl.classList.add('is-success');
+        }
+
+        function setWprAreaFormStatus(message, type) {
+            const statusEl = document.getElementById('wprAreaFormStatus');
+            statusEl.textContent = message;
+            statusEl.className = 'form-status';
+
+            if (type === 'error') statusEl.classList.add('is-error');
+            if (type === 'success') statusEl.classList.add('is-success');
+        }
+
+        function setMapLocationStatus(message, type) {
+            const statusEl = document.getElementById('mapLocationStatus');
+            statusEl.textContent = message;
+            statusEl.style.color = type === 'error'
+                ? '#b42318'
+                : type === 'success'
+                    ? '#027a48'
+                    : '#7b6b76';
+        }
+
+        function setPetiFormStatus(message, type) {
+            const statusEl = document.getElementById('petiFormStatus');
+            statusEl.textContent = message;
+            statusEl.className = 'form-status';
+
+            if (type === 'error') statusEl.classList.add('is-error');
+            if (type === 'success') statusEl.classList.add('is-success');
+        }
+
+        function safeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function switchPetiCoordinateFormat(format) {
+            petiCoordinateFormat = format === 'dms' ? 'dms' : 'dd';
+            document.getElementById('petiDdPanel').classList.toggle('is-active', petiCoordinateFormat === 'dd');
+            document.getElementById('petiDmsPanel').classList.toggle('is-active', petiCoordinateFormat === 'dms');
+            document.getElementById('petiFormatDdButton').classList.toggle('is-active', petiCoordinateFormat === 'dd');
+            document.getElementById('petiFormatDmsButton').classList.toggle('is-active', petiCoordinateFormat === 'dms');
+        }
+
+        function convertDmsToDecimal(degrees, minutes, seconds, hemisphere, axisLabel) {
+            if (!Number.isFinite(degrees) || !Number.isFinite(minutes) || !Number.isFinite(seconds)) {
+                throw new Error(`Koordinat ${axisLabel} DMS belum lengkap.`);
+            }
+
+            if (minutes < 0 || minutes >= 60 || seconds < 0 || seconds >= 60) {
+                throw new Error(`Nilai menit/detik koordinat ${axisLabel} tidak valid.`);
+            }
+
+            let decimal = Math.abs(degrees) + (minutes / 60) + (seconds / 3600);
+            if (hemisphere === 'S' || hemisphere === 'W') {
+                decimal *= -1;
+            }
+            return decimal;
+        }
+
+        function getPetiCoordinates() {
+            if (petiCoordinateFormat === 'dd') {
+                const longitude = Number(document.getElementById('petiLongitudeDd').value);
+                const latitude = Number(document.getElementById('petiLatitudeDd').value);
+
+                if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
+                    throw new Error('Koordinat X dan Y dalam Decimal Degree wajib diisi.');
+                }
+
+                return { longitude, latitude };
+            }
+
+            const longitude = convertDmsToDecimal(
+                Number(document.getElementById('petiLongitudeDeg').value),
+                Number(document.getElementById('petiLongitudeMin').value),
+                Number(document.getElementById('petiLongitudeSec').value),
+                document.getElementById('petiLongitudeHemisphere').value,
+                'X'
+            );
+
+            const latitude = convertDmsToDecimal(
+                Number(document.getElementById('petiLatitudeDeg').value),
+                Number(document.getElementById('petiLatitudeMin').value),
+                Number(document.getElementById('petiLatitudeSec').value),
+                document.getElementById('petiLatitudeHemisphere').value,
+                'Y'
+            );
+
+            return { longitude, latitude };
+        }
+
+        function validateLatitudeLongitude(latitude, longitude) {
+            if (latitude < -90 || latitude > 90) {
+                throw new Error('Latitude/Y harus berada pada rentang -90 sampai 90.');
+            }
+
+            if (longitude < -180 || longitude > 180) {
+                throw new Error('Longitude/X harus berada pada rentang -180 sampai 180.');
+            }
+        }
+
+        function formatCoordinate(value) {
+            return Number(value).toFixed(6);
+        }
+
+        function getPetiSignature(points) {
+            try {
+                return JSON.stringify(Array.isArray(points) ? points : []);
+            } catch (error) {
+                return '[]';
+            }
+        }
+
+        function applyPetiPoints(points) {
+            petiPoints = Array.isArray(points) ? points : [];
+            petiDataSignature = getPetiSignature(petiPoints);
+            if (allData) {
+                applyFilters();
+            } else {
+                refreshPetiUi();
+            }
+        }
+
+        function readPetiLocalState(key, fallback) {
+            try {
+                const stored = JSON.parse(localStorage.getItem(key) || 'null');
+                if (Array.isArray(fallback)) {
+                    return Array.isArray(stored) ? stored : fallback;
+                }
+                return stored && typeof stored === 'object' ? stored : fallback;
+            } catch (error) {
+                return fallback;
+            }
+        }
+
+        function writePetiLocalState(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        async function loadBundledPetiPoints() {
+            const response = await fetch(PETI_STATIC_DATA_URL, { cache: 'no-store' });
+            if (!response.ok) {
+                throw new Error('Data PETI bawaan tidak berhasil dibaca.');
+            }
+
+            const result = await response.json();
+            return Array.isArray(result) ? result : [];
+        }
+
+        function mergePetiPoints(bundledPoints, addedPoints, deletedIds) {
+            const deletedSet = new Set((deletedIds || []).map(id => String(id)));
+            const mergedMap = new Map();
+
+            (Array.isArray(bundledPoints) ? bundledPoints : []).forEach(point => {
+                const id = String(point?.id || '');
+                if (!id || deletedSet.has(id)) return;
+                mergedMap.set(id, point);
+            });
+
+            (Array.isArray(addedPoints) ? addedPoints : []).forEach(point => {
+                const id = String(point?.id || '');
+                if (!id || deletedSet.has(id)) return;
+                mergedMap.set(id, point);
+            });
+
+            return Array.from(mergedMap.values());
+        }
+
+        async function requestPetiApi(payload) {
+            const bundledPoints = await loadBundledPetiPoints();
+            const addedPoints = readPetiLocalState(PETI_LOCAL_ADDED_KEY, []);
+            let deletedIds = readPetiLocalState(PETI_LOCAL_DELETED_KEY, []);
+
+            if (!payload) {
+                return {
+                    success: true,
+                    points: mergePetiPoints(bundledPoints, addedPoints, deletedIds)
+                };
+            }
+
+            if (payload.action === 'add') {
+                const nextPoint = payload.point || {};
+                const nextId = String(nextPoint.id || '');
+                const nextAddedPoints = [nextPoint].concat(addedPoints.filter(point => String(point?.id || '') !== nextId));
+                deletedIds = deletedIds.filter(id => String(id) !== nextId);
+                writePetiLocalState(PETI_LOCAL_ADDED_KEY, nextAddedPoints);
+                writePetiLocalState(PETI_LOCAL_DELETED_KEY, deletedIds);
+
+                return {
+                    success: true,
+                    message: 'Titik PETI berhasil disimpan di browser ini.',
+                    points: mergePetiPoints(bundledPoints, nextAddedPoints, deletedIds)
+                };
+            }
+
+            if (payload.action === 'delete') {
+                const deleteId = String(payload.id || '');
+                const nextAddedPoints = addedPoints.filter(point => String(point?.id || '') !== deleteId);
+                const bundledHasPoint = bundledPoints.some(point => String(point?.id || '') === deleteId);
+                deletedIds = deletedIds.filter(id => String(id) !== deleteId);
+                if (bundledHasPoint) {
+                    deletedIds.unshift(deleteId);
+                }
+                writePetiLocalState(PETI_LOCAL_ADDED_KEY, nextAddedPoints);
+                writePetiLocalState(PETI_LOCAL_DELETED_KEY, deletedIds);
+
+                return {
+                    success: true,
+                    message: 'Titik PETI berhasil dihapus dari browser ini.',
+                    points: mergePetiPoints(bundledPoints, nextAddedPoints, deletedIds)
+                };
+            }
+
+            throw new Error('Aksi PETI tidak dikenali.');
+        }
+
+        async function loadPetiPointsFromServer(options = {}) {
+            if (petiSyncInFlight) return;
+
+            const { silent = false } = options;
+            petiSyncInFlight = true;
+
+            try {
+                const result = await requestPetiApi();
+                const nextPoints = Array.isArray(result.points) ? result.points : [];
+                const nextSignature = getPetiSignature(nextPoints);
+
+                if (nextSignature !== petiDataSignature) {
+                    applyPetiPoints(nextPoints);
+                    if (!silent) {
+                        setPetiFormStatus('Data PETI GitHub Pages berhasil dimuat.', 'success');
+                    }
+                }
+            } catch (error) {
+                if (!silent) {
+                    setPetiFormStatus(error.message, 'error');
+                }
+            } finally {
+                petiSyncInFlight = false;
+            }
+        }
+
+        function initializePetiData() {
+            applyPetiPoints([]);
+            loadPetiPointsFromServer({ silent: true });
+            window.addEventListener('focus', function() {
+                loadPetiPointsFromServer({ silent: true });
+            });
+        }
+
+        function renderPetiTable() {
+            const petiTableBody = document.getElementById('petiTableBody');
+            const canEdit = isEditor();
+
+            if (!petiPoints.length) {
+                petiTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="empty-table">Belum ada titik PETI yang diinput.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            petiTableBody.innerHTML = petiPoints.map(point => `
+                <tr>
+                    <td>${safeHtml(point.nama || '-')}</td>
+                    <td>${safeHtml(point.komoditas || '-')}</td>
+                    <td>${safeHtml(point.sumber || '-')}</td>
+                    <td>${point.tanggal ? safeHtml(formatTanggal(point.tanggal)) : '-'}</td>
+                    <td>${safeHtml(formatCoordinate(point.longitude))}</td>
+                    <td>${safeHtml(formatCoordinate(point.latitude))}</td>
+                    <td>${point.photoDataUrl ? '<a href="' + safeHtml(point.photoDataUrl) + '" target="_blank" rel="noopener noreferrer" class="peti-photo-link">Lihat Foto</a>' : '-'}</td>
+                    <td>${safeHtml(point.keterangan || '-')}</td>
+                    <td>${canEdit ? '<button type="button" class="table-action-btn" data-peti-delete-id="' + safeHtml(point.id) + '">Hapus</button>' : '<span>-</span>'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function createPetiPopupContent(point) {
+            const photoContent = point.photoDataUrl
+                ? `<img src="${safeHtml(point.photoDataUrl)}" alt="Foto PETI ${safeHtml(point.nama || 'Lokasi')}" class="popup-photo">`
+                : '';
+
+            return `
+                <div class="popup-card" style="background:#fff4f2; border:1px solid #f1b2ac;">
+                    <div class="popup-title">${safeHtml(point.nama || 'Titik PETI')}</div>
+                    <div class="popup-status-badge" style="background:#d92d20; color:#ffffff;">PETI</div><br>
+                    <b>Komoditas:</b> ${safeHtml(point.komoditas || '-')}<br>
+                    <b>Sumber Data:</b> ${safeHtml(point.sumber || '-')}<br>
+                    <b>Longitude (X):</b> ${safeHtml(formatCoordinate(point.longitude))}<br>
+                    <b>Latitude (Y):</b> ${safeHtml(formatCoordinate(point.latitude))}<br>
+                    <b>Tanggal Data:</b> ${point.tanggal ? safeHtml(formatTanggal(point.tanggal)) : '-'}<br>
+                    <div class="popup-location-line"><b>Keterangan:</b> ${safeHtml(point.keterangan || '-')}</div>
+                    ${photoContent}
+                </div>
+            `;
+        }
+
+        function renderPetiMarkers(points = petiPoints) {
+            if (petiMarkerLayer) {
+                map.removeLayer(petiMarkerLayer);
+            }
+
+            petiMarkerLayer = L.layerGroup();
+
+            points.forEach(point => {
+                const marker = L.circleMarker([point.latitude, point.longitude], {
+                    radius: 8,
+                    color: '#8f1d14',
+                    weight: 2,
+                    fillColor: '#d92d20',
+                    fillOpacity: 0.92
+                });
+
+                marker.bindPopup(createPetiPopupContent(point));
+                petiMarkerLayer.addLayer(marker);
+            });
+
+            petiMarkerLayer.addTo(map);
+        }
+
+        function refreshPetiUi() {
+            renderPetiMarkers();
+            renderPetiTable();
+        }
+
+        function getFilteredPetiPoints() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+            const izin = document.getElementById('filterIzin').value;
+
+            return petiPoints.filter(point => {
+                const nama = String(point.nama || '').toLowerCase();
+                const matchesKeyword = !keyword || nama.includes(keyword);
+                const matchesIzin = !izin || izin === 'PETI';
+
+                return matchesKeyword && matchesIzin;
+            });
+        }
+
+        function resetPetiForm() {
+            document.getElementById('petiNama').value = '';
+            document.getElementById('petiKomoditas').value = '';
+            document.getElementById('petiSumber').value = '';
+            document.getElementById('petiTanggal').value = '';
+            document.getElementById('petiLongitudeDd').value = '';
+            document.getElementById('petiLatitudeDd').value = '';
+            document.getElementById('petiLongitudeDeg').value = '';
+            document.getElementById('petiLongitudeMin').value = '';
+            document.getElementById('petiLongitudeSec').value = '';
+            document.getElementById('petiLatitudeDeg').value = '';
+            document.getElementById('petiLatitudeMin').value = '';
+            document.getElementById('petiLatitudeSec').value = '';
+            document.getElementById('petiLongitudeHemisphere').value = 'E';
+            document.getElementById('petiLatitudeHemisphere').value = 'N';
+            document.getElementById('petiKeterangan').value = '';
+            document.getElementById('petiFoto').value = '';
+            switchPetiCoordinateFormat('dd');
+        }
+
+        function readFileAsDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = event => resolve(event.target.result);
+                reader.onerror = () => reject(new Error('Foto gagal dibaca.'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function savePetiPoint() {
+            try {
+                if (!requireEditorAccess()) return;
+
+                const nama = getInputValue('petiNama');
+                const komoditas = getInputValue('petiKomoditas');
+                const sumber = getInputValue('petiSumber');
+
+                if (!nama) throw new Error('Nama/lokasi PETI wajib diisi.');
+                if (!komoditas) throw new Error('Komoditas PETI wajib dipilih.');
+                if (!sumber) throw new Error('Sumber data PETI wajib dipilih.');
+
+                const coordinates = getPetiCoordinates();
+                validateLatitudeLongitude(coordinates.latitude, coordinates.longitude);
+
+                const photoFile = document.getElementById('petiFoto').files[0];
+                let photoDataUrl = '';
+                if (photoFile) {
+                    photoDataUrl = await readFileAsDataUrl(photoFile);
+                }
+
+                const newPoint = {
+                    id: `peti-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                    nama,
+                    komoditas,
+                    sumber,
+                    tanggal: document.getElementById('petiTanggal').value ? new Date(document.getElementById('petiTanggal').value).getTime() : null,
+                    longitude: coordinates.longitude,
+                    latitude: coordinates.latitude,
+                    keterangan: getInputValue('petiKeterangan'),
+                    photoDataUrl
+                };
+
+                const result = await requestPetiApi({
+                    action: 'add',
+                    point: newPoint
+                });
+
+                applyPetiPoints(result.points || []);
+                resetPetiForm();
+                setPetiFormStatus(`Titik PETI "${nama}" berhasil ditambahkan ke peta dan tabel atribut.`, 'success');
+            } catch (error) {
+                setPetiFormStatus(error.message, 'error');
+            }
+        }
+
+        async function deletePetiPoint(id) {
+            if (!requireEditorAccess()) return;
+
+            const existingPoint = petiPoints.find(point => point.id === id);
+            if (!existingPoint) return;
+
+            try {
+                const result = await requestPetiApi({
+                    action: 'delete',
+                    id
+                });
+
+                applyPetiPoints(result.points || []);
+                setPetiFormStatus(`Titik PETI "${existingPoint.nama || id}" berhasil dihapus.`, 'success');
+            } catch (error) {
+                setPetiFormStatus(error.message, 'error');
+            }
+        }
+
+        function clearCurrentLocation() {
+            let hadLayer = false;
+
+            if (currentLocationMarker) {
+                map.removeLayer(currentLocationMarker);
+                currentLocationMarker = null;
+                hadLayer = true;
+            }
+
+            if (currentLocationAccuracy) {
+                map.removeLayer(currentLocationAccuracy);
+                currentLocationAccuracy = null;
+                hadLayer = true;
+            }
+
+            setMapLocationStatus(
+                hadLayer
+                    ? 'Tampilan lokasi saat ini sudah disembunyikan dari peta.'
+                    : 'Belum ada lokasi saat ini yang ditampilkan.',
+                hadLayer ? 'default' : 'error'
+            );
+        }
+
+        function showCurrentLocation() {
+            if (!navigator.geolocation) {
+                setMapLocationStatus('Browser ini tidak mendukung geolokasi.', 'error');
+                return;
+            }
+
+            setMapLocationStatus('Mencari lokasi saat ini...', 'default');
+
+            navigator.geolocation.getCurrentPosition(position => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                const accuracy = position.coords.accuracy || 0;
+                const latlng = [latitude, longitude];
+
+                if (currentLocationMarker) {
+                    map.removeLayer(currentLocationMarker);
+                }
+
+                if (currentLocationAccuracy) {
+                    map.removeLayer(currentLocationAccuracy);
+                }
+
+                currentLocationMarker = L.marker(latlng).addTo(map);
+                currentLocationMarker.bindPopup(`
+                    <div class="popup-card">
+                        <div class="popup-title">Lokasi Saat Ini</div>
+                        <b>Latitude:</b> ${latitude.toFixed(6)}<br>
+                        <b>Longitude:</b> ${longitude.toFixed(6)}<br>
+                        <b>Akurasi:</b> sekitar ${Math.round(accuracy)} meter
+                    </div>
+                `).openPopup();
+
+                currentLocationAccuracy = L.circle(latlng, {
+                    radius: accuracy,
+                    color: '#1d4ed8',
+                    weight: 1.5,
+                    fillColor: '#60a5fa',
+                    fillOpacity: 0.12
+                }).addTo(map);
+
+                const locationBounds = currentLocationAccuracy.getBounds();
+                if (locationBounds.isValid()) {
+                    map.fitBounds(locationBounds, { padding: [32, 32], maxZoom: 16 });
+                } else {
+                    map.setView(latlng, 16);
+                }
+
+                setMapLocationStatus('Lokasi saat ini berhasil ditampilkan di peta.', 'success');
+            }, error => {
+                const errorMessages = {
+                    1: 'Izin lokasi ditolak. Izinkan akses lokasi di browser untuk menampilkannya di peta.',
+                    2: 'Lokasi tidak tersedia. Coba aktifkan GPS atau koneksi internet.',
+                    3: 'Permintaan lokasi melebihi batas waktu. Coba lagi.'
+                };
+
+                setMapLocationStatus(errorMessages[error.code] || 'Lokasi saat ini gagal didapatkan.', 'error');
+            }, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            });
+        }
+
+        function parseCoordinatesFromWorksheetRows(rows) {
+            if (!rows.length) {
+                throw new Error('File Excel tidak berisi data koordinat.');
+            }
+
+            const normalizedHeaders = rows[0].map(header => String(header || '').trim().toLowerCase());
+            const xIndex = normalizedHeaders.findIndex(header => header === 'x' || header === 'lon' || header === 'longitude');
+            const yIndex = normalizedHeaders.findIndex(header => header === 'y' || header === 'lat' || header === 'latitude');
+
+            if (xIndex === -1 || yIndex === -1) {
+                throw new Error('Kolom Excel harus memiliki header X dan Y.');
+            }
+
+            const coordinates = rows
+                .slice(1)
+                .filter(row => row && row.length)
+                .map((row, index) => {
+                    const lng = Number(String(row[xIndex] ?? '').replace(',', '.'));
+                    const lat = Number(String(row[yIndex] ?? '').replace(',', '.'));
+
+                    if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
+                        throw new Error(`Koordinat Excel tidak valid di baris data ${index + 2}.`);
+                    }
+
+                    return [lng, lat];
+                });
+
+            if (coordinates.length < 3) {
+                throw new Error('File Excel harus berisi minimal 3 titik koordinat.');
+            }
+
+            const first = coordinates[0];
+            const last = coordinates[coordinates.length - 1];
+            if (first[0] !== last[0] || first[1] !== last[1]) {
+                coordinates.push([first[0], first[1]]);
+            }
+
+            return coordinates;
+        }
+
+        function loadCoordinatesFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (typeof XLSX === 'undefined') {
+                setInputFormStatus('Library pembaca Excel tidak tersedia.', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(loadEvent) {
+                try {
+                    const workbook = XLSX.read(loadEvent.target.result, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+                    uploadedCoordinates = parseCoordinatesFromWorksheetRows(rows);
+                    setInputFormStatus(`Koordinat dari file Excel "${file.name}" berhasil dibaca. Siap ditambahkan ke peta.`, 'success');
+                } catch (error) {
+                    uploadedCoordinates = null;
+                    setInputFormStatus(error.message, 'error');
+                }
+            };
+
+            reader.onerror = function() {
+                uploadedCoordinates = null;
+                setInputFormStatus('File Excel tidak dapat dibaca.', 'error');
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function loadWiupCoordinatesFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (typeof XLSX === 'undefined') {
+                setWiupFormStatus('Library pembaca Excel tidak tersedia.', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(loadEvent) {
+                try {
+                    const workbook = XLSX.read(loadEvent.target.result, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+                    wiupPreviewCoordinates = parseCoordinatesFromWorksheetRows(rows);
+                    setWiupFormStatus(`File WIUP "${file.name}" berhasil dibaca. Klik tombol cek untuk menampilkan preview.`, 'success');
+                } catch (error) {
+                    wiupPreviewCoordinates = null;
+                    setWiupFormStatus(error.message, 'error');
+                }
+            };
+
+            reader.onerror = function() {
+                wiupPreviewCoordinates = null;
+                setWiupFormStatus('File Excel WIUP tidak dapat dibaca.', 'error');
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function loadWprAreaCoordinatesFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (typeof XLSX === 'undefined') {
+                setWprAreaFormStatus('Library pembaca Excel tidak tersedia.', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(loadEvent) {
+                try {
+                    const workbook = XLSX.read(loadEvent.target.result, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+                    wprAreaPreviewCoordinates = parseCoordinatesFromWorksheetRows(rows);
+                    setWprAreaFormStatus(`File area WPR "${file.name}" berhasil dibaca. Klik tombol cek untuk menampilkan preview.`, 'success');
+                } catch (error) {
+                    wprAreaPreviewCoordinates = null;
+                    setWprAreaFormStatus(error.message, 'error');
+                }
+            };
+
+            reader.onerror = function() {
+                wprAreaPreviewCoordinates = null;
+                setWprAreaFormStatus('File Excel area WPR tidak dapat dibaca.', 'error');
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function checkWiupOverlap(previewFeature) {
+            if (!allData || !allData.features || typeof turf === 'undefined') {
+                return [];
+            }
+
+            return allData.features.filter(feature => {
+                try {
+                    return !!turf.intersect(previewFeature, feature);
+                } catch (error) {
+                    return false;
+                }
+            });
+        }
+
+        function previewWiupPolygon() {
+            try {
+                if (!wiupPreviewCoordinates || !wiupPreviewCoordinates.length) {
+                    throw new Error('Upload file Excel WIUP terlebih dahulu.');
+                }
+
+                const previewFeature = {
+                    type: 'Feature',
+                    properties: {
+                        Nama: 'Preview WIUP'
+                    },
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: [wiupPreviewCoordinates.map(point => [point[0], point[1]])]
+                    }
+                };
+
+                if (wiupPreviewLayer) {
+                    map.removeLayer(wiupPreviewLayer);
+                }
+
+                wiupPreviewLayer = L.geoJSON(previewFeature, {
+                    style: {
+                        color: '#ff8a00',
+                        weight: 3,
+                        fillColor: '#ffb347',
+                        fillOpacity: 0.18,
+                        dashArray: '8 6'
+                    }
+                }).addTo(map);
+
+                const overlaps = checkWiupOverlap(previewFeature);
+                const bounds = wiupPreviewLayer.getBounds();
+                if (bounds.isValid()) {
+                    map.fitBounds(bounds, { padding: [24, 24] });
+                }
+
+                if (overlaps.length) {
+                    const sampleNames = overlaps
+                        .slice(0, 3)
+                        .map(feature => feature.properties.Nama || feature.properties.Izin || 'Tanpa nama')
+                        .join(', ');
+                    const extraText = overlaps.length > 3 ? ` dan ${overlaps.length - 3} lainnya` : '';
+                    setWiupFormStatus(`Peringatan: polygon WIUP tumpang tindih dengan ${overlaps.length} polygon, termasuk ${sampleNames}${extraText}.`, 'error');
+                } else {
+                    setWiupFormStatus('Preview WIUP berhasil ditampilkan. Tidak terdeteksi tumpang tindih dengan polygon yang ada.', 'success');
+                }
+            } catch (error) {
+                setWiupFormStatus(error.message, 'error');
+            }
+        }
+
+        function checkPolygonWithinWpr(previewFeature) {
+            if (!allData || !allData.features || typeof turf === 'undefined') {
+                return { inside: false, matches: [] };
+            }
+
+            const wprFeatures = allData.features.filter(feature => (feature.properties.Izin || '').trim() === 'WPR');
+            const matches = wprFeatures.filter(feature => {
+                try {
+                    const intersection = turf.intersect(previewFeature, feature);
+                    if (!intersection) return false;
+
+                    const previewArea = turf.area(previewFeature);
+                    const intersectionArea = turf.area(intersection);
+                    return previewArea > 0 && (intersectionArea / previewArea) > 0.999;
+                } catch (error) {
+                    return false;
+                }
+            });
+
+            return {
+                inside: matches.length > 0,
+                matches
+            };
+        }
+
+        function previewWprAreaPolygon() {
+            try {
+                if (!wprAreaPreviewCoordinates || !wprAreaPreviewCoordinates.length) {
+                    throw new Error('Upload file Excel area WPR terlebih dahulu.');
+                }
+
+                const previewFeature = {
+                    type: 'Feature',
+                    properties: {
+                        Nama: 'Preview Area WPR'
+                    },
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: [wprAreaPreviewCoordinates.map(point => [point[0], point[1]])]
+                    }
+                };
+
+                if (wprAreaPreviewLayer) {
+                    map.removeLayer(wprAreaPreviewLayer);
+                }
+
+                wprAreaPreviewLayer = L.geoJSON(previewFeature, {
+                    style: {
+                        color: '#9b59b6',
+                        weight: 3,
+                        fillColor: '#c79be8',
+                        fillOpacity: 0.16,
+                        dashArray: '6 5'
+                    }
+                }).addTo(map);
+
+                const checkResult = checkPolygonWithinWpr(previewFeature);
+                const bounds = wprAreaPreviewLayer.getBounds();
+                if (bounds.isValid()) {
+                    map.fitBounds(bounds, { padding: [24, 24] });
+                }
+
+                if (!checkResult.inside) {
+                    setWprAreaFormStatus('Peringatan: polygon hasil upload berada di luar area polygon WPR.', 'error');
+                } else {
+                    const sampleNames = checkResult.matches
+                        .slice(0, 3)
+                        .map(feature => feature.properties.Nama || 'WPR')
+                        .join(', ');
+                    setWprAreaFormStatus(`Preview area WPR berhasil ditampilkan dan berada di dalam polygon WPR: ${sampleNames}.`, 'success');
+                }
+            } catch (error) {
+                setWprAreaFormStatus(error.message, 'error');
+            }
+        }
+
+        function getInputValue(id) {
+            return document.getElementById(id).value.trim();
+        }
+
+        function addPolygonFromInput() {
+            try {
+                if (!requireEditorAccess()) return;
+
+                const nama = getInputValue('inputNama');
+                const izin = getInputValue('inputIzin');
+
+                if (!nama) {
+                    throw new Error('Nama wajib diisi.');
+                }
+
+                if (!uploadedCoordinates || !uploadedCoordinates.length) {
+                    throw new Error('File Excel koordinat wajib dipilih dan berhasil dibaca.');
+                }
+
+                const coordinates = uploadedCoordinates.map(point => [point[0], point[1]]);
+                const tanggalSkValue = document.getElementById('inputTanggalSk').value;
+
+                if (!allData) {
+                    allData = { type: 'FeatureCollection', features: [] };
+                }
+
+                allData.features.push({
+                    type: 'Feature',
+                    id: customFeatureId++,
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: [coordinates]
+                    },
+                    properties: {
+                        Nama: nama,
+                        Komoditas: getInputValue('inputKomoditas'),
+                        Area: Number(document.getElementById('inputArea').value || 0),
+                        Status: getInputValue('inputStatus'),
+                        Izin: izin,
+                        Nomor_SK: getInputValue('inputNomorSk'),
+                        Masa: getInputValue('inputMasa'),
+                        Tanggal: tanggalSkValue ? new Date(tanggalSkValue).getTime() : null,
+                        Kabupaten: getInputValue('inputKabupaten'),
+                        Kecamatan: getInputValue('inputKecamatan'),
+                        Desa: getInputValue('inputDesa'),
+                        RKAB: '',
+                        Dok_Teknis: ''
+                    }
+                });
+
+                refreshFiltersPreserveSelection();
+                applyFilters();
+                document.getElementById('inputKoordinatFile').value = '';
+                uploadedCoordinates = null;
+                setInputFormStatus(`Polygon "${nama}" berhasil ditambahkan ke peta.`, 'success');
+            } catch (error) {
+                setInputFormStatus(error.message, 'error');
+            }
+        }
+
+        function applyFilters() {
+            if (!allData) return;
+
+            const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+            const kabupaten = document.getElementById('filterKabupaten').value;
+            const kecamatan = document.getElementById('filterKecamatan').value;
+            const izin = document.getElementById('filterIzin').value;
+            const status = document.getElementById('filterStatus').value;
+
+            const filteredFeatures = allData.features.filter(feature => {
+                const p = feature.properties;
+                const nama = (p.Nama || '').toLowerCase();
+
+                return (!keyword || nama.includes(keyword)) &&
+                       (!kabupaten || p.Kabupaten === kabupaten) &&
+                       (!kecamatan || p.Kecamatan === kecamatan) &&
+                       (!izin || p.Izin === izin) &&
+                       (!status || p.Status === status);
+            });
+
+            const filteredData = {
+                type: 'FeatureCollection',
+                features: filteredFeatures
+            };
+
+            renderMap(filteredData);
+            renderPetiMarkers(getFilteredPetiPoints());
+            updateTable(filteredData);
+            updateCards(filteredData);
+            updateCharts(filteredData);
+        }
+
+        function hasValue(value) {
+            return value !== null && value !== undefined && !(typeof value === 'string' && value.trim() === '');
+        }
+
+        function getFieldDisplayValue(field, properties) {
+            const p = properties || {};
+
+            if (field === 'Area') {
+                return hasValue(p.Area) ? Number(p.Area || 0).toFixed(2) : '-';
+            }
+
+            if (field === 'Tanggal') {
+                return hasValue(p.Tanggal) ? formatTanggal(p.Tanggal) : '-';
+            }
+
+            return hasValue(p[field]) ? p[field] : '-';
+        }
+
+        function parseMasaBerlaku(masa) {
+            const value = (masa || '').trim().toLowerCase();
+            if (!value) return null;
+
+            const yearsMatch = value.match(/(\d+)\s*tahun/);
+            const monthsMatch = value.match(/(\d+)\s*bulan/);
+
+            return {
+                years: yearsMatch ? Number(yearsMatch[1]) : 0,
+                months: monthsMatch ? Number(monthsMatch[1]) : 0
+            };
+        }
+
+        function addDuration(date, duration) {
+            const result = new Date(date.getTime());
+            result.setFullYear(result.getFullYear() + (duration.years || 0));
+            result.setMonth(result.getMonth() + (duration.months || 0));
+            return result;
+        }
+
+        function getIzinExpiryAnalysis(properties) {
+            const tanggal = properties ? properties.Tanggal : null;
+            const masa = properties ? properties.Masa : null;
+
+            if (!hasValue(tanggal) || !hasValue(masa)) {
+                return {
+                    rowClass: '',
+                    badgeClass: 'expiry-badge expiry-badge--default',
+                    label: '-'
+                };
+            }
+
+            const startDate = new Date(tanggal);
+            const duration = parseMasaBerlaku(masa);
+
+            if (isNaN(startDate.getTime()) || !duration || (!duration.years && !duration.months)) {
+                return {
+                    rowClass: '',
+                    badgeClass: 'expiry-badge expiry-badge--default',
+                    label: '-'
+                };
+            }
+
+            const expiryDate = addDuration(startDate, duration);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const sixMonthsAhead = new Date(today.getTime());
+            sixMonthsAhead.setMonth(sixMonthsAhead.getMonth() + 6);
+
+            if (expiryDate < today) {
+                return {
+                    rowClass: 'row-expiring',
+                    badgeClass: 'expiry-badge expiry-badge--expired',
+                    label: 'Sudah Berakhir'
+                };
+            }
+
+            if (expiryDate <= sixMonthsAhead) {
+                return {
+                    rowClass: 'row-expiring',
+                    badgeClass: 'expiry-badge expiry-badge--warning',
+                    label: 'Berakhir <= 6 Bulan'
+                };
+            }
+
+            return {
+                rowClass: '',
+                badgeClass: 'expiry-badge expiry-badge--default',
+                label: '-'
+            };
+        }
+
+        function updateTable(data) {
+            const polygonTableBody = document.getElementById('polygonTableBody');
+            const sipbTableBody = document.getElementById('sipbTableBody');
+            const wprTableHead = document.getElementById('wprTableHead');
+            const wprTableBody = document.getElementById('wprTableBody');
+            const generalIzinFeatures = data.features.filter(feature => {
+                const izin = (feature.properties.Izin || '').trim();
+                return izin !== 'WPR' && izin !== 'SIPB';
+            });
+            const sipbFeatures = data.features.filter(feature => (feature.properties.Izin || '').trim() === 'SIPB');
+            const wprFeatures = data.features.filter(feature => (feature.properties.Izin || '').trim() === 'WPR');
+
+            if (!generalIzinFeatures.length) {
+                polygonTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="12" class="empty-table">Tidak ada data izin selain SIPB dan WPR yang sesuai dengan filter.</td>
+                    </tr>
+                `;
+            } else {
+                polygonTableBody.innerHTML = generalIzinFeatures.map(feature => {
+                    const p = feature.properties || {};
+                    const expiryAnalysis = getIzinExpiryAnalysis(p);
+
+                    return `
+                        <tr class="${expiryAnalysis.rowClass}">
+                            <td>${p.Nama || '-'}</td>
+                            <td>${p.Komoditas || '-'}</td>
+                            <td>${p.Izin || '-'}</td>
+                            <td>${p.Status || '-'}</td>
+                            <td>${p.Kabupaten || '-'}</td>
+                            <td>${p.Kecamatan || '-'}</td>
+                            <td>${p.Desa || '-'}</td>
+                            <td>${Number(p.Area || 0).toFixed(2)}</td>
+                            <td>${p.Nomor_SK || '-'}</td>
+                            <td>${formatTanggal(p.Tanggal)}</td>
+                            <td>${p.Masa || '-'}</td>
+                            <td><span class="${expiryAnalysis.badgeClass}">${expiryAnalysis.label}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            if (!sipbFeatures.length) {
+                sipbTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="12" class="empty-table">Tidak ada data SIPB yang sesuai dengan filter.</td>
+                    </tr>
+                `;
+            } else {
+                sipbTableBody.innerHTML = sipbFeatures.map(feature => {
+                    const p = feature.properties || {};
+                    const expiryAnalysis = getIzinExpiryAnalysis(p);
+
+                    return `
+                        <tr class="${expiryAnalysis.rowClass}">
+                            <td>${p.Nama || '-'}</td>
+                            <td>${p.Komoditas || '-'}</td>
+                            <td>${p.Status || '-'}</td>
+                            <td>${p.Kabupaten || '-'}</td>
+                            <td>${p.Kecamatan || '-'}</td>
+                            <td>${p.Desa || '-'}</td>
+                            <td>${Number(p.Area || 0).toFixed(2)}</td>
+                            <td>${p.Nomor_SK || '-'}</td>
+                            <td>${formatTanggal(p.Tanggal)}</td>
+                            <td>${p.Masa || '-'}</td>
+                            <td>${p.Dok_Teknis || '-'}</td>
+                            <td><span class="${expiryAnalysis.badgeClass}">${expiryAnalysis.label}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            const wprColumns = [
+                { key: 'Nama', label: 'Nama' },
+                { key: 'Komoditas', label: 'Komoditas' },
+                { key: 'Izin', label: 'Jenis Izin' },
+                { key: 'Status', label: 'Status' },
+                { key: 'Kabupaten', label: 'Kabupaten' },
+                { key: 'Kecamatan', label: 'Kecamatan' },
+                { key: 'Desa', label: 'Desa' },
+                { key: 'Area', label: 'Luas Area (Ha)' },
+                { key: 'Nomor_SK', label: 'Nomor SK' },
+                { key: 'Tanggal', label: 'Tanggal SK' },
+                { key: 'Masa', label: 'Masa Berlaku' },
+                { key: 'RKAB', label: 'RKAB' }
+            ].filter(column => wprFeatures.some(feature => {
+                const value = feature.properties ? feature.properties[column.key] : null;
+                return hasValue(value) || column.key === 'Area';
+            }));
+
+            if (!wprFeatures.length) {
+                wprTableHead.innerHTML = `
+                    <tr>
+                        <th>Tabel WPR</th>
+                    </tr>
+                `;
+                wprTableBody.innerHTML = `
+                    <tr>
+                        <td class="empty-table">Tidak ada data WPR yang sesuai dengan filter.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            wprTableHead.innerHTML = `
+                <tr>
+                    ${wprColumns.map(column => `<th>${column.label}</th>`).join('')}
+                </tr>
+            `;
+
+            wprTableBody.innerHTML = wprFeatures.map(feature => {
+                const p = feature.properties || {};
+
+                return `
+                    <tr>
+                        ${wprColumns.map(column => `<td>${getFieldDisplayValue(column.key, p)}</td>`).join('')}
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderMap(data) {
+            if (geoLayer) {
+                map.removeLayer(geoLayer);
+            }
+
+            geoLayer = L.geoJSON(data, {
+                style: function(feature) {
+                    return {
+                        color: getPolygonColor(feature),
+                        weight: 2,
+                        fillOpacity: 0.6
+                    };
+                },
+                onEachFeature: function(feature, layer) {
+                    const p = feature.properties;
+                    const statusTheme = getStatusTheme(p.Status);
+                    const izin = (p.Izin || '').trim();
+                    const showRkabBox = izin === 'IUP OP' || izin === 'IUP Eksplorasi';
+                    const showDokTeknisBox = izin === 'SIPB';
+                    const rkabContent = showRkabBox ? `
+                            <div class="popup-rkab-box" style="background:${statusTheme.boxBackground}; border-color:${statusTheme.boxBorder};">
+                                <span class="popup-rkab-label" style="color:${statusTheme.boxLabel};">RKAB 2026</span>
+                                <span class="popup-rkab-value" style="color:${statusTheme.boxValue};">${p.RKAB || 'Belum tersedia'}</span>
+                            </div>
+                    ` : '';
+                    const dokTeknisContent = showDokTeknisBox ? `
+                            <div class="popup-rkab-box" style="background:${statusTheme.boxBackground}; border-color:${statusTheme.boxBorder};">
+                                <span class="popup-rkab-label" style="color:${statusTheme.boxLabel};">Dokumen Teknis</span>
+                                <span class="popup-rkab-value" style="color:${statusTheme.boxValue};">${p.Dok_Teknis || 'Belum tersedia'}</span>
+                            </div>
+                    ` : '';
+
+                    const popupContent = `
+                        <div class="popup-card" style="background:${statusTheme.background}; border:1px solid ${statusTheme.border};">
+                            <div class="popup-title">${p.Nama || '-'}</div>
+                            <div class="popup-status-badge" style="background:${statusTheme.badgeBackground}; color:${statusTheme.badgeText};">
+                                ${p.Status || '-'}
+                            </div><br>
+                            ${dokTeknisContent}
+                            ${rkabContent}
+                             <b>Komoditas:</b> ${p.Komoditas || '-'}<br>
+                             <b>Jenis Izin:</b> ${p.Izin || '-'}<br>
+                             <div class="popup-location-line"><b>Lokasi:</b> ${p.Kabupaten || '-'}, ${p.Kecamatan || '-'}, ${p.Desa || '-'}</div>
+                             <b>Luas Area:</b> ${Number(p.Area || 0).toFixed(2)} Ha<br>
+                             <b>Nomor SK:</b> ${p.Nomor_SK || '-'}<br>
+                             <b>Tanggal SK:</b> ${formatTanggal(p.Tanggal)}<br>
+                             <b>Masa Berlaku:</b> ${p.Masa || '-'}
+                        </div>
+                    `;
+
+                    layer.bindPopup(popupContent);
+
+                    layer.on('mouseover', function() {
+                        layer.setStyle({
+                            weight: 4,
+                            fillOpacity: 0.8
+                        });
+                    });
+
+                    layer.on('mouseout', function() {
+                        geoLayer.resetStyle(layer);
+                    });
+                }
+            }).addTo(map);
+
+            if (data.features.length > 0) {
+                map.fitBounds(geoLayer.getBounds(), { padding: [20, 20] });
+            }
+        }
+
+        function updateCards(data) {
+            const totalIzin = data.features.length;
+            const totalLuas = data.features.reduce((sum, feature) => {
+                return sum + Number(feature.properties.Area || 0);
+            }, 0);
+
+            document.getElementById('totalIzin').textContent = totalIzin;
+            document.getElementById('totalLuas').textContent = totalLuas.toFixed(2);
+        }
+
+        function countByField(features, fieldName) {
+            const counts = {};
+            features.forEach(feature => {
+                const value = feature.properties[fieldName] || 'Tidak Ada';
+                counts[value] = (counts[value] || 0) + 1;
+            });
+            return counts;
+        }
+
+        function getRKAB_IUP(features) {
+            const result = {
+                "Tidak ada kegiatan": 0,
+                "Proses Pengajuan": 0,
+                "Proses Penandatanganan Persetujuan": 0,
+                "Sudah Mendapat Persetujuan": 0
+            };
+
+            features.forEach(f => {
+                const izin = (f.properties.Izin || '').toLowerCase();
+                const rkab = (f.properties.RKAB || '').toLowerCase();
+
+                // hanya IUP OP & Eksplorasi
+                if (izin === 'iup op' || izin === 'iup eksplorasi') {
+
+                    if (rkab.includes('tidak ada kegiatan')) {
+                        result["Tidak ada kegiatan"]++;
+
+                    } else if (rkab.includes('pengajuan')) {
+                        result["Proses Pengajuan"]++;
+
+                    } else if (rkab.includes('penandatanganan')) {
+                        result["Proses Penandatanganan Persetujuan"]++;
+
+                    } else {
+                        // ðŸ”¥ semua sisanya masuk sini
+                        result["Sudah Mendapat Persetujuan"]++;
+                    }
+                }
+            });
+
+         return result;
+    }
+
+        function getDokTeknisSIPB(features) {
+            const result = {
+                'Lengkap': 0,
+                'Belum Lengkap': 0
+            };
+
+            features.forEach(feature => {
+                const izin = (feature.properties.Izin || '').trim().toUpperCase();
+                const dokTeknis = (feature.properties.Dok_Teknis || '').trim().toLowerCase();
+
+                if (izin !== 'SIPB') return;
+
+                if (dokTeknis === 'lengkap') {
+                    result['Lengkap']++;
+                } else {
+                    result['Belum Lengkap']++;
+                }
+            });
+
+            return result;
+        }
+
+        function normalizeKomoditasForAnalysis(komoditas) {
+            const value = (komoditas || '').trim().toLowerCase();
+
+            if (value === 'kerikil berpasir alami (sirtu)') return 'Kerikil Berpasir Alami (Sirtu)';
+            if (value === 'pasir tanah urug' || value === 'tanah urug') return 'Tanah Urug';
+            if (value === 'batu gamping') return 'Batu Gamping';
+            if (value === 'pasir') return 'Pasir';
+            if (value === 'batu gunung kuari besar') return 'Batu Gunung Kuari Besar';
+
+            return null;
+        }
+
+        function updateCharts(data) {
+            const izinCounts = countByField(data.features, 'Izin');
+            const statusCounts = countByField(data.features, 'Status');
+            const komoditasColors = ['#fe9ec7', '#4da6ff', '#00c27a', '#ffaa00', '#7d6bff', '#ff7a59', '#6c757d', '#6ec1ff'];
+            const analisisKomoditasItems = [
+                { label: 'Kerikil Berpasir Alami (Sirtu)' },
+                { label: 'Tanah Urug' },
+                { label: 'Batu Gamping' },
+                { label: 'Pasir' },
+                { label: 'Batu Gunung Kuari Besar' }
+            ];
+            const analisisKomoditasLabels = analisisKomoditasItems.map(item => item.label);
+            const analisisKomoditasCounts = Object.fromEntries(
+                analisisKomoditasLabels.map(label => [label, 0])
+            );
+
+            data.features.forEach(feature => {
+                const normalizedKomoditas = normalizeKomoditasForAnalysis(feature.properties.Komoditas);
+                if (normalizedKomoditas) {
+                    analisisKomoditasCounts[normalizedKomoditas]++;
+                }
+            });
+
+            const analisisKomoditasValues = analisisKomoditasLabels.map(label => analisisKomoditasCounts[label]);
+
+            if (izinChart) izinChart.destroy();
+            if (statusChart) statusChart.destroy();
+            if (rkabChart) rkabChart.destroy();
+            if (dokTeknisChart) dokTeknisChart.destroy();
+            if (komoditasBarChart) komoditasBarChart.destroy();
+
+            izinChart = new Chart(document.getElementById('izinChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(izinCounts),
+                    datasets: [{
+                        label: 'Jumlah Izin',
+                        data: Object.values(izinCounts),
+                        backgroundColor: Object.keys(izinCounts).map(label => getIzinColor(label))
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+
+            statusChart = new Chart(document.getElementById('statusChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(statusCounts),
+                    datasets: [{
+                        data: Object.values(statusCounts),
+                        backgroundColor: Object.keys(statusCounts).map(status => {
+                            const normalizedStatus = (status || '').trim().toLowerCase();
+
+                            if (normalizedStatus === 'aktif') return '#00c27a';
+                            if (normalizedStatus === 'dalam proses') return '#6ec1ff';
+                            if (normalizedStatus === 'masa berlaku habis') return '#ff3b30';
+                            return '#cccccc';
+                        })
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+            
+            // ðŸ”¥ RKAB CHART
+            const rkabData = getRKAB_IUP(data.features);
+            const dokTeknisData = getDokTeknisSIPB(data.features);
+
+            rkabChart = new Chart(document.getElementById('rkabChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(rkabData),
+                    datasets: [{
+                        data: Object.values(rkabData),
+                        backgroundColor: [
+                            '#999999',  // Tidak ada kegiatan
+                            '#ffaa00',  // Proses Pengajuan
+                            '#4da6ff',  // Proses Penandatanganan Persetujuan
+                            '#00c27a'   // Sudah disetujui
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            dokTeknisChart = new Chart(document.getElementById('dokTeknisChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(dokTeknisData),
+                    datasets: [{
+                        data: Object.values(dokTeknisData),
+                        backgroundColor: ['#00c27a', '#ffb020']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            komoditasBarChart = new Chart(document.getElementById('komoditasBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: analisisKomoditasLabels,
+                    datasets: [{
+                        label: 'Jumlah Komoditas',
+                        data: analisisKomoditasValues,
+                        backgroundColor: analisisKomoditasLabels.map((_, index) => komoditasColors[index % komoditasColors.length]),
+                        borderRadius: 8,
+                        barThickness: 18
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    layout: {
+                        padding: {
+                            left: 12,
+                            right: 12
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                autoSkip: false,
+                                color: '#444',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                color: '#666'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        fetch('data/WGS2_Dashboard.json')
+            .then(response => response.json())
+            .then(data => {
+                allData = data;
+                populateFilters(data);
+                renderMap(data);
+                updateTable(data);
+                updateCards(data);
+                updateCharts(data);
+            })
+            .catch(error => {
+                console.error('Gagal membaca GeoJSON:', error);
+                alert('File GeoJSON tidak berhasil dibaca. Cek nama file dan lokasi penyimpanan.');
+            });
+
+        document.getElementById('searchInput').addEventListener('input', function(event) {
+            renderSearchSuggestions(event.target.value);
+            applyFilters();
+        });
+        document.getElementById('searchInput').addEventListener('keydown', function(event) {
+            const items = [...document.querySelectorAll('.search-suggestion-item')];
+            if (!items.length) return;
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                searchSuggestionIndex = Math.min(searchSuggestionIndex + 1, items.length - 1);
+                updateSearchSuggestionActiveItem();
+                return;
+            }
+
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                searchSuggestionIndex = Math.max(searchSuggestionIndex - 1, 0);
+                updateSearchSuggestionActiveItem();
+                return;
+            }
+
+            if (event.key === 'Enter' && searchSuggestionIndex >= 0) {
+                event.preventDefault();
+                applySearchSuggestion(items[searchSuggestionIndex].getAttribute('data-search-suggestion') || '');
+                return;
+            }
+
+            if (event.key === 'Escape') {
+                closeSearchSuggestions();
+            }
+        });
+        document.getElementById('searchSuggestions').addEventListener('click', function(event) {
+            const button = event.target.closest('[data-search-suggestion]');
+            if (!button) return;
+            applySearchSuggestion(button.getAttribute('data-search-suggestion') || '');
+        });
+        document.addEventListener('click', function(event) {
+            const searchBox = document.querySelector('.search-box');
+            if (!searchBox.contains(event.target)) {
+                closeSearchSuggestions();
+            }
+        });
+        document.getElementById('filterKabupaten').addEventListener('change', applyFilters);
+        document.getElementById('filterKecamatan').addEventListener('change', applyFilters);
+        document.getElementById('filterIzin').addEventListener('change', applyFilters);
+        document.getElementById('filterStatus').addEventListener('change', applyFilters);
+        document.getElementById('inputKoordinatFile').addEventListener('change', loadCoordinatesFromExcel);
+        document.getElementById('wiupKoordinatFile').addEventListener('change', loadWiupCoordinatesFromExcel);
+        document.getElementById('wprKoordinatFile').addEventListener('change', loadWprAreaCoordinatesFromExcel);
+        document.getElementById('addPolygonButton').addEventListener('click', addPolygonFromInput);
+        document.getElementById('checkWiupButton').addEventListener('click', previewWiupPolygon);
+        document.getElementById('checkWprAreaButton').addEventListener('click', previewWprAreaPolygon);
+        document.getElementById('locateMeButton').addEventListener('click', showCurrentLocation);
+        document.getElementById('clearLocationButton').addEventListener('click', clearCurrentLocation);
+        document.getElementById('savePetiButton').addEventListener('click', savePetiPoint);
+        document.getElementById('petiFormatDdButton').addEventListener('click', function() {
+            switchPetiCoordinateFormat('dd');
+        });
+        document.getElementById('petiFormatDmsButton').addEventListener('click', function() {
+            switchPetiCoordinateFormat('dms');
+        });
+        document.getElementById('petiTableBody').addEventListener('click', function(event) {
+            const deleteId = event.target.getAttribute('data-peti-delete-id');
+            if (!deleteId) return;
+            deletePetiPoint(deleteId);
+        });
+        initializeLogin();
+    </script>
+</body>
+<script>
+let lastUpdate = Date.now();
+
+setInterval(() => {
+    fetch(window.location.href, { method: 'HEAD' })
+        .then(res => {
+            const lastModified = res.headers.get('Last-Modified');
+
+            if (lastModified) {
+                const newTime = new Date(lastModified).getTime();
+
+                if (newTime > lastUpdate) {
+                    location.reload();
+                }
+            }
+        })
+        .catch(() => {});
+}, 2000);
+</script>
+</html>

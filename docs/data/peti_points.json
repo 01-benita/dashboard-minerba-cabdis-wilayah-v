@@ -1,0 +1,68 @@
+[
+  {
+    "id": "peti-batu-ruso-2",
+    "nama": "PETI Batu Ruso 2",
+    "komoditas": "Mineral Bukan Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": 1775174400000,
+    "longitude": 99.01795658,
+    "latitude": 0.8156223,
+    "keterangan": "",
+    "photoDataUrl": "data/peti_photos/peti-batu-ruso-2.jpeg"
+  },
+  {
+    "id": "peti-batu-ruso-1",
+    "nama": "PETI Batu Ruso 1",
+    "komoditas": "Mineral Bukan Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": 1775174400000,
+    "longitude": 99.01603843,
+    "latitude": 0.8169881,
+    "keterangan": "",
+    "photoDataUrl": "data/peti_photos/peti-batu-ruso-1.jpeg"
+  },
+  {
+    "id": "peti-pandan-4",
+    "nama": "PETI Pandan 4",
+    "komoditas": "Mineral Bukan Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": 1775174400000,
+    "longitude": 98.852869,
+    "latitude": 1.715964,
+    "keterangan": "",
+    "photoDataUrl": "data/peti_photos/peti-pandan-4.jpeg"
+  },
+  {
+    "id": "peti-pandan-3",
+    "nama": "PETI Pandan 3",
+    "komoditas": "Mineral Bukan Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": 1775174400000,
+    "longitude": 98.852854,
+    "latitude": 1.715982,
+    "keterangan": "",
+    "photoDataUrl": "data/peti_photos/peti-pandan-3.jpeg"
+  },
+  {
+    "id": "peti-pandan-2",
+    "nama": "PETI Pandan 2",
+    "komoditas": "Mineral Bukan Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": 1775174400000,
+    "longitude": 98.852876,
+    "latitude": 1.715991,
+    "keterangan": "",
+    "photoDataUrl": "data/peti_photos/peti-pandan-2.jpeg"
+  },
+  {
+    "id": "peti-pandan-1",
+    "nama": "PETI Pandan 1",
+    "komoditas": "Mineral Bukan Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": 1775174400000,
+    "longitude": 98.852876,
+    "latitude": 1.715992,
+    "keterangan": "",
+    "photoDataUrl": "data/peti_photos/peti-pandan-1.jpeg"
+  }
+]
