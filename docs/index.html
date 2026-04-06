@@ -18,7 +18,7 @@
 
         body {
             margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: "Segoe UI", "Trebuchet MS", "Helvetica Neue", Arial, sans-serif;
             background: linear-gradient(135deg, #f7e8f3, #f2eefc);
             color: #333;
         }
@@ -255,6 +255,37 @@
 
         .menu-text {
             display: inline;
+        }
+
+        .table-focus-btn {
+            display: block;
+            width: 100%;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #111111;
+            font: inherit;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            text-decoration: none;
+            letter-spacing: 0.01em;
+            line-height: 1.45;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .table-focus-btn:hover {
+            color: #111111;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .table-focus-btn.is-temporary-active {
+            color: #7c3aed;
+            text-decoration: underline;
+            text-underline-offset: 2px;
         }
 
         .sidebar.active .menu-text {
@@ -1691,6 +1722,10 @@
         let currentLocationMarker = null;
         let currentLocationAccuracy = null;
         let petiMarkerLayer = null;
+        let renderedGeoFeatureLayers = new Map();
+        let renderedPetiMarkerLayers = new Map();
+        let activeHighlightReset = null;
+        let activeTableButtonReset = null;
         let petiPoints = [];
         let uploadedPetiGeoJsonPoints = [];
         let currentUserRole = 'viewer';
@@ -1698,6 +1733,10 @@
         let petiSyncInFlight = false;
         let petiDataSignature = '[]';
         let searchSuggestionIndex = -1;
+        let currentGeneralIzinFeatures = [];
+        let currentSipbFeatures = [];
+        let currentWprFeatures = [];
+        let currentFilteredPetiPoints = [];
         let baseMaps = {
             'OpenStreetMap': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap'
@@ -1979,6 +2018,16 @@
             searchSuggestionIndex = -1;
         }
 
+        function showNameInDashboardVisualization(name) {
+            const normalizedName = String(name || '').trim();
+            if (!normalizedName) return;
+
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = normalizedName;
+            closeSearchSuggestions();
+            applyFilters();
+        }
+
         function applySearchSuggestion(value) {
             document.getElementById('searchInput').value = value;
             closeSearchSuggestions();
@@ -2087,6 +2136,170 @@
 
         function formatCoordinate(value) {
             return Number(value).toFixed(6);
+        }
+
+        function getGeoFeatureKey(feature) {
+            const properties = feature?.properties || {};
+            if (feature?.id !== null && typeof feature?.id !== 'undefined' && String(feature.id).trim() !== '') {
+                return `feature-id:${String(feature.id).trim()}`;
+            }
+
+            const geometry = feature?.geometry || {};
+            let coordinatesSample = '';
+            try {
+                coordinatesSample = JSON.stringify(geometry.coordinates || []).slice(0, 120);
+            } catch (error) {
+                coordinatesSample = '';
+            }
+
+            return [
+                String(properties.Nama || '').trim(),
+                String(properties.Izin || '').trim(),
+                String(properties.Status || '').trim(),
+                String(properties.Kabupaten || '').trim(),
+                String(properties.Kecamatan || '').trim(),
+                String(properties.Desa || '').trim(),
+                String(properties.Nomor_SK || '').trim(),
+                String(properties.Tanggal || '').trim(),
+                String(geometry.type || '').trim(),
+                coordinatesSample
+            ].join('|');
+        }
+
+        function focusMapOnGeoFeature(feature) {
+            if (!feature || !map) return;
+
+            const layer = renderedGeoFeatureLayers.get(getGeoFeatureKey(feature));
+            if (!layer) return;
+
+            if (typeof layer.getBounds === 'function') {
+                const bounds = layer.getBounds();
+                if (bounds && typeof bounds.isValid === 'function' && bounds.isValid()) {
+                    map.fitBounds(bounds, { padding: [24, 24] });
+                }
+            } else if (typeof layer.getLatLng === 'function') {
+                map.setView(layer.getLatLng(), 16);
+            }
+
+            if (typeof layer.openPopup === 'function') {
+                layer.openPopup();
+            }
+
+            highlightGeoLayerTemporarily(layer);
+        }
+
+        function focusMapOnPetiPoint(point) {
+            if (!point || !map) return;
+
+            const marker = renderedPetiMarkerLayers.get(String(point.id || ''));
+            if (marker) {
+                if (typeof marker.getLatLng === 'function') {
+                    map.setView(marker.getLatLng(), 16);
+                }
+                if (typeof marker.openPopup === 'function') {
+                    marker.openPopup();
+                }
+                highlightPetiMarkerTemporarily(marker);
+                return;
+            }
+
+            if (Number.isFinite(Number(point.latitude)) && Number.isFinite(Number(point.longitude))) {
+                map.setView([Number(point.latitude), Number(point.longitude)], 16);
+            }
+        }
+
+        function clearActiveHighlight() {
+            if (typeof activeHighlightReset === 'function') {
+                activeHighlightReset();
+                activeHighlightReset = null;
+            }
+        }
+
+        function highlightTableButtonTemporarily(button) {
+            if (!button) return;
+
+            if (typeof activeTableButtonReset === 'function') {
+                activeTableButtonReset();
+                activeTableButtonReset = null;
+            }
+
+            button.classList.add('is-temporary-active');
+
+            const timeoutId = window.setTimeout(() => {
+                button.classList.remove('is-temporary-active');
+                activeTableButtonReset = null;
+            }, 2200);
+
+            activeTableButtonReset = function() {
+                window.clearTimeout(timeoutId);
+                button.classList.remove('is-temporary-active');
+            };
+        }
+
+        function highlightGeoLayerTemporarily(layer) {
+            clearActiveHighlight();
+
+            if (!layer || typeof layer.setStyle !== 'function') {
+                return;
+            }
+
+            layer.setStyle({
+                color: '#ff7a18',
+                weight: 5,
+                fillOpacity: 0.78
+            });
+
+            const timeoutId = window.setTimeout(() => {
+                if (geoLayer && typeof geoLayer.resetStyle === 'function') {
+                    geoLayer.resetStyle(layer);
+                }
+                activeHighlightReset = null;
+            }, 2200);
+
+            activeHighlightReset = function() {
+                window.clearTimeout(timeoutId);
+                if (geoLayer && typeof geoLayer.resetStyle === 'function') {
+                    geoLayer.resetStyle(layer);
+                }
+            };
+        }
+
+        function highlightPetiMarkerTemporarily(marker) {
+            clearActiveHighlight();
+
+            if (!marker || typeof marker.setStyle !== 'function') {
+                return;
+            }
+
+            marker.setStyle({
+                radius: 12,
+                color: '#ff7a18',
+                weight: 3,
+                fillColor: '#ffd166',
+                fillOpacity: 1
+            });
+
+            const timeoutId = window.setTimeout(() => {
+                marker.setStyle({
+                    radius: 8,
+                    color: '#8f1d14',
+                    weight: 2,
+                    fillColor: '#d92d20',
+                    fillOpacity: 0.92
+                });
+                activeHighlightReset = null;
+            }, 2200);
+
+            activeHighlightReset = function() {
+                window.clearTimeout(timeoutId);
+                marker.setStyle({
+                    radius: 8,
+                    color: '#8f1d14',
+                    weight: 2,
+                    fillColor: '#d92d20',
+                    fillOpacity: 0.92
+                });
+            };
         }
 
         function getPetiSignature(points) {
@@ -2479,6 +2692,7 @@
         function renderPetiTable(points = petiPoints) {
             const petiTableBody = document.getElementById('petiTableBody');
             const canEdit = isEditor();
+            currentFilteredPetiPoints = points;
 
             if (!points.length) {
                 petiTableBody.innerHTML = `
@@ -2491,7 +2705,7 @@
 
             petiTableBody.innerHTML = points.map(point => `
                 <tr>
-                    <td>${safeHtml(point.nama || '-')}</td>
+                    <td><button type="button" class="table-focus-btn" data-peti-focus-id="${safeHtml(point.id || '')}">${safeHtml(point.nama || '-')}</button></td>
                     <td>${safeHtml(point.komoditas || '-')}</td>
                     <td>${safeHtml(point.sumber || '-')}</td>
                     <td>${point.tanggal ? safeHtml(formatTanggal(point.tanggal)) : '-'}</td>
@@ -2530,6 +2744,7 @@
             }
 
             petiMarkerLayer = L.layerGroup();
+            renderedPetiMarkerLayers = new Map();
 
             points.forEach(point => {
                 const marker = L.circleMarker([point.latitude, point.longitude], {
@@ -2542,6 +2757,7 @@
 
                 marker.bindPopup(createPetiPopupContent(point));
                 petiMarkerLayer.addLayer(marker);
+                renderedPetiMarkerLayers.set(String(point.id || ''), marker);
             });
 
             petiMarkerLayer.addTo(map);
@@ -3131,6 +3347,9 @@
             });
             const sipbFeatures = data.features.filter(feature => (feature.properties.Izin || '').trim() === 'SIPB');
             const wprFeatures = data.features.filter(feature => (feature.properties.Izin || '').trim() === 'WPR');
+            currentGeneralIzinFeatures = generalIzinFeatures;
+            currentSipbFeatures = sipbFeatures;
+            currentWprFeatures = wprFeatures;
 
             if (!generalIzinFeatures.length) {
                 polygonTableBody.innerHTML = `
@@ -3142,10 +3361,11 @@
                 polygonTableBody.innerHTML = generalIzinFeatures.map(feature => {
                     const p = feature.properties || {};
                     const expiryAnalysis = getIzinExpiryAnalysis(p);
+                    const featureKey = getGeoFeatureKey(feature);
 
                     return `
                         <tr class="${expiryAnalysis.rowClass}">
-                            <td>${p.Nama || '-'}</td>
+                            <td><button type="button" class="table-focus-btn" data-feature-key="${safeHtml(featureKey)}" data-feature-group="general">${safeHtml(p.Nama || '-')}</button></td>
                             <td>${p.Komoditas || '-'}</td>
                             <td>${p.Izin || '-'}</td>
                             <td>${p.Status || '-'}</td>
@@ -3172,10 +3392,11 @@
                 sipbTableBody.innerHTML = sipbFeatures.map(feature => {
                     const p = feature.properties || {};
                     const expiryAnalysis = getIzinExpiryAnalysis(p);
+                    const featureKey = getGeoFeatureKey(feature);
 
                     return `
                         <tr class="${expiryAnalysis.rowClass}">
-                            <td>${p.Nama || '-'}</td>
+                            <td><button type="button" class="table-focus-btn" data-feature-key="${safeHtml(featureKey)}" data-feature-group="sipb">${safeHtml(p.Nama || '-')}</button></td>
                             <td>${p.Komoditas || '-'}</td>
                             <td>${p.Status || '-'}</td>
                             <td>${p.Kabupaten || '-'}</td>
@@ -3232,10 +3453,13 @@
 
             wprTableBody.innerHTML = wprFeatures.map(feature => {
                 const p = feature.properties || {};
+                const featureKey = getGeoFeatureKey(feature);
 
                 return `
                     <tr>
-                        ${wprColumns.map(column => `<td>${getFieldDisplayValue(column.key, p)}</td>`).join('')}
+                        ${wprColumns.map((column, columnIndex) => columnIndex === 0
+                            ? `<td><button type="button" class="table-focus-btn" data-feature-key="${safeHtml(featureKey)}" data-feature-group="wpr">${safeHtml(getFieldDisplayValue(column.key, p))}</button></td>`
+                            : `<td>${getFieldDisplayValue(column.key, p)}</td>`).join('')}
                     </tr>
                 `;
             }).join('');
@@ -3245,6 +3469,8 @@
             if (geoLayer) {
                 map.removeLayer(geoLayer);
             }
+
+            renderedGeoFeatureLayers = new Map();
 
             geoLayer = L.geoJSON(data, {
                 style: function(feature) {
@@ -3292,6 +3518,7 @@
                     `;
 
                     layer.bindPopup(popupContent);
+                    renderedGeoFeatureLayers.set(getGeoFeatureKey(feature), layer);
 
                     layer.on('mouseover', function() {
                         layer.setStyle({
@@ -3646,9 +3873,74 @@
         document.getElementById('petiGeojsonFile').addEventListener('change', loadPetiGeoJsonFromFile);
         document.getElementById('savePetiGeojsonButton').addEventListener('click', savePetiGeoJson);
         document.getElementById('petiTableBody').addEventListener('click', function(event) {
+            const focusButton = event.target.closest('[data-peti-focus-id]');
+            if (focusButton) {
+                highlightTableButtonTemporarily(focusButton);
+                const pointId = focusButton.getAttribute('data-peti-focus-id') || '';
+                const point = currentFilteredPetiPoints.find(item => String(item?.id || '') === pointId);
+                if (point) {
+                    focusMapOnPetiPoint(point);
+                }
+                return;
+            }
+
             const deleteId = event.target.getAttribute('data-peti-delete-id');
             if (!deleteId) return;
             deletePetiPoint(deleteId);
+        });
+        document.getElementById('polygonTableBody').addEventListener('click', function(event) {
+            const focusButton = event.target.closest('[data-feature-key]');
+            if (!focusButton) return;
+            highlightTableButtonTemporarily(focusButton);
+            const featureKey = focusButton.getAttribute('data-feature-key') || '';
+            const clickedFeature = currentGeneralIzinFeatures.find(item => getGeoFeatureKey(item) === featureKey);
+            if (clickedFeature) {
+                showNameInDashboardVisualization(clickedFeature.properties?.Nama || '');
+                const mapPanel = document.getElementById('map-panel');
+                if (mapPanel && typeof mapPanel.scrollIntoView === 'function') {
+                    mapPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                window.setTimeout(() => {
+                    const feature = currentGeneralIzinFeatures.find(item => getGeoFeatureKey(item) === featureKey) || clickedFeature;
+                    focusMapOnGeoFeature(feature);
+                }, 120);
+            }
+        });
+        document.getElementById('sipbTableBody').addEventListener('click', function(event) {
+            const focusButton = event.target.closest('[data-feature-key]');
+            if (!focusButton) return;
+            highlightTableButtonTemporarily(focusButton);
+            const featureKey = focusButton.getAttribute('data-feature-key') || '';
+            const clickedFeature = currentSipbFeatures.find(item => getGeoFeatureKey(item) === featureKey);
+            if (clickedFeature) {
+                showNameInDashboardVisualization(clickedFeature.properties?.Nama || '');
+                const mapPanel = document.getElementById('map-panel');
+                if (mapPanel && typeof mapPanel.scrollIntoView === 'function') {
+                    mapPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                window.setTimeout(() => {
+                    const feature = currentSipbFeatures.find(item => getGeoFeatureKey(item) === featureKey) || clickedFeature;
+                    focusMapOnGeoFeature(feature);
+                }, 120);
+            }
+        });
+        document.getElementById('wprTableBody').addEventListener('click', function(event) {
+            const focusButton = event.target.closest('[data-feature-key]');
+            if (!focusButton) return;
+            highlightTableButtonTemporarily(focusButton);
+            const featureKey = focusButton.getAttribute('data-feature-key') || '';
+            const clickedFeature = currentWprFeatures.find(item => getGeoFeatureKey(item) === featureKey);
+            if (clickedFeature) {
+                showNameInDashboardVisualization(clickedFeature.properties?.Nama || '');
+                const mapPanel = document.getElementById('map-panel');
+                if (mapPanel && typeof mapPanel.scrollIntoView === 'function') {
+                    mapPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                window.setTimeout(() => {
+                    const feature = currentWprFeatures.find(item => getGeoFeatureKey(item) === featureKey) || clickedFeature;
+                    focusMapOnGeoFeature(feature);
+                }, 120);
+            }
         });
         initializeLogin();
     </script>
