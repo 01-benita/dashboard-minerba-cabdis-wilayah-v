@@ -188,9 +188,12 @@
             background: linear-gradient(180deg, #f47fb0 0%, #ee8fc1 55%, #f29bc8 100%);
             color: white;
             transition: 0.3s;
-            z-index: 1000;
+            z-index: 1200;
             overflow-y: auto;
             overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            touch-action: pan-y;
             padding: 14px 12px 18px;
             box-shadow: 14px 0 30px rgba(205, 95, 145, 0.18);
         }
@@ -254,6 +257,7 @@
             flex-direction: column;
             gap: 8px;
             padding: 0;
+            touch-action: pan-y;
         }
 
         .menu a {
@@ -1968,6 +1972,39 @@
 
             document.getElementById('sidebar').classList.remove('active');
             document.getElementById('sidebarOverlay').classList.remove('is-visible');
+        }
+
+        function bindMobileSidebarMenuBehavior() {
+            let sidebarTouchMoved = false;
+            let sidebarTouchStartX = 0;
+            let sidebarTouchStartY = 0;
+
+            document.querySelectorAll('#sidebar .menu a').forEach(function(link) {
+                link.addEventListener('touchstart', function(event) {
+                    const touch = event.touches[0];
+                    sidebarTouchMoved = false;
+                    sidebarTouchStartX = touch.clientX;
+                    sidebarTouchStartY = touch.clientY;
+                }, { passive: true });
+
+                link.addEventListener('touchmove', function(event) {
+                    const touch = event.touches[0];
+                    const deltaX = Math.abs(touch.clientX - sidebarTouchStartX);
+                    const deltaY = Math.abs(touch.clientY - sidebarTouchStartY);
+                    if (deltaX > 8 || deltaY > 8) {
+                        sidebarTouchMoved = true;
+                    }
+                }, { passive: true });
+
+                link.addEventListener('click', function(event) {
+                    if (sidebarTouchMoved) {
+                        event.preventDefault();
+                        return;
+                    }
+
+                    closeSidebarOnMobile();
+                });
+            });
         }
 
         function formatTanggal(timestamp) {
@@ -4127,9 +4164,7 @@
         document.getElementById('filterStatus').addEventListener('change', applyFilters);
         document.getElementById('mobileMenuButton').addEventListener('click', toggleSidebar);
         document.getElementById('sidebarOverlay').addEventListener('click', closeSidebarOnMobile);
-        document.querySelectorAll('#sidebar .menu a').forEach(function(link) {
-            link.addEventListener('click', closeSidebarOnMobile);
-        });
+        bindMobileSidebarMenuBehavior();
         document.getElementById('inputGeojsonFile').addEventListener('change', loadInputGeoJsonFromFile);
         document.getElementById('wiupKoordinatFile').addEventListener('change', loadWiupCoordinatesFromExcel);
         document.getElementById('wprKoordinatFile').addEventListener('change', loadWprAreaCoordinatesFromExcel);
