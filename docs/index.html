@@ -1340,7 +1340,7 @@
     <div class="app-shell is-hidden" id="appShell">
 
     <div class="sidebar" id="sidebar">
-        <button class="toggle-btn" onclick="toggleSidebar()">â˜°</button>
+        <button class="toggle-btn" onclick="toggleSidebar()" aria-label="Toggle sidebar">&#9776;</button>
         <div class="brand">
             <span class="brand-title">MINERBA</span>
             <span class="brand-subtitle">Dashboard Wilayah V</span>
@@ -1427,7 +1427,6 @@
                             <button type="button" class="outline-btn" id="clearLocationButton">Sembunyikan Lokasi</button>
                             <span class="map-status" id="mapLocationStatus">Klik tombol untuk menampilkan lokasi saat ini.</span>
                             <div class="legend-inline">
-                                <span class="legend-title">Legenda</span>
                                 <div class="legend-item"><span class="legend-color" style="background:#ff4fa3;"></span> SIPB</div>
                                 <div class="legend-item"><span class="legend-color" style="background:#4da6ff;"></span> IUP OP</div>
                                 <div class="legend-item"><span class="legend-color" style="background:#00c27a;"></span> IUP Eksplorasi</div>
@@ -1542,163 +1541,36 @@
                 </div>
 
                 <div class="panel input-panel editor-only" id="peti-input-panel">
-                    <h3>Input Titik PETI</h3>
-                    <div class="coord-format-toggle">
-                        <button type="button" class="is-active" data-format="dd" id="petiFormatDdButton">Decimal Degree</button>
-                        <button type="button" data-format="dms" id="petiFormatDmsButton">DMS</button>
-                    </div>
+                    <h3>Import GeoJSON PETI</h3>
                     <div class="input-grid">
-                        <div class="input-group">
-                            <label for="petiNama">Nama/Lokasi PETI</label>
-                            <input type="text" id="petiNama" placeholder="Contoh: PETI Pandan">
-                        </div>
-                        <div class="input-group">
-                            <label for="petiKomoditas">Komoditas</label>
-                            <select id="petiKomoditas">
-                                <option value="">Pilih Komoditas</option>
-                                <option value="Mineral Logam">Mineral Logam</option>
-                                <option value="Mineral Bukan Logam">Mineral Bukan Logam</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label for="petiSumber">Sumber Data</label>
-                            <select id="petiSumber">
-                                <option value="">Pilih Sumber Data</option>
-                                <option value="Pengaduan Masyarakat">Pengaduan Masyarakat</option>
-                                <option value="Kepolisian">Kepolisian</option>
-                                <option value="Pemerintah Daerah">Pemerintah Daerah</option>
-                                <option value="Sumber Lain">Sumber Lain</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label for="petiTanggal">Tanggal Data</label>
-                            <input type="date" id="petiTanggal">
-                        </div>
-                        <div class="input-group input-group--full coord-panel is-active" id="petiDdPanel">
-                            <div class="input-grid">
-                                <div class="input-group">
-                                    <label for="petiLongitudeDd">Koordinat X / Longitude (Decimal Degree)</label>
-                                    <input type="number" id="petiLongitudeDd" step="0.000001" placeholder="98.852876">
-                                </div>
-                                <div class="input-group">
-                                    <label for="petiLatitudeDd">Koordinat Y / Latitude (Decimal Degree)</label>
-                                    <input type="number" id="petiLatitudeDd" step="0.000001" placeholder="1.715991">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="input-group input-group--full coord-panel" id="petiDmsPanel">
-                            <div class="input-grid">
-                                <div class="input-group">
-                                    <label>Koordinat X / Longitude (DMS)</label>
-                                    <div class="dms-grid">
-                                        <input type="number" id="petiLongitudeDeg" placeholder="98">
-                                        <input type="number" id="petiLongitudeMin" placeholder="51">
-                                        <input type="number" id="petiLongitudeSec" step="0.01" placeholder="10.35">
-                                        <select id="petiLongitudeHemisphere">
-                                            <option value="E">E</option>
-                                            <option value="W">W</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="input-group">
-                                    <label>Koordinat Y / Latitude (DMS)</label>
-                                    <div class="dms-grid">
-                                        <input type="number" id="petiLatitudeDeg" placeholder="1">
-                                        <input type="number" id="petiLatitudeMin" placeholder="42">
-                                        <input type="number" id="petiLatitudeSec" step="0.01" placeholder="57.57">
-                                        <select id="petiLatitudeHemisphere">
-                                            <option value="N">N</option>
-                                            <option value="S">S</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <div class="input-group input-group--full">
-                            <label for="petiKeterangan">Keterangan</label>
-                            <textarea id="petiKeterangan" placeholder="Catatan tambahan lokasi PETI, akses, kondisi lapangan, atau temuan lainnya."></textarea>
-                        </div>
-                        <div class="input-group input-group--full">
-                            <label for="petiFoto">Upload Foto</label>
-                            <input type="file" id="petiFoto" accept="image/*">
+                            <label for="petiGeojsonFile">File GeoJSON PETI</label>
+                            <input type="file" id="petiGeojsonFile" accept=".geojson,.json,application/geo+json,application/json">
                         </div>
                     </div>
                     <div class="input-help">
-                        Pada GitHub Pages, titik PETI bawaan dibaca dari file dashboard. Perubahan editor yang ditambahkan atau dihapus akan tersimpan di browser ini.
+                        Upload file `.geojson/.json` bertipe `FeatureCollection` atau `Feature`. Properti yang dibaca bila tersedia: `id`, `nama`, `komoditas`, `sumber`, `tanggal`, `keterangan`, dan `photoDataUrl`. Geometri `Point` akan dipakai langsung, sedangkan geometri lain akan memakai titik representatif.
                     </div>
                     <div class="input-actions">
-                        <button type="button" class="primary-btn" id="savePetiButton">Simpan Titik PETI</button>
-                        <span class="form-status" id="petiFormStatus">Masukkan koordinat X,Y dalam Decimal Degree atau DMS, lalu simpan titik PETI.</span>
+                        <button type="button" class="primary-btn" id="savePetiGeojsonButton">Tambah Data PETI dari GeoJSON</button>
+                        <span class="form-status" id="petiFormStatus">Pilih file GeoJSON PETI, lalu tambahkan datanya ke peta dan tabel.</span>
                     </div>
                 </div>
 
                 <div class="panel input-panel editor-only" id="input-panel">
-                    <h3>Input Polygon Koordinat</h3>
+                    <h3>Import GeoJSON Izin</h3>
                     <div class="input-grid">
-                        <div class="input-group">
-                            <label for="inputNama">Nama</label>
-                            <input type="text" id="inputNama" placeholder="Contoh: PT Contoh Mineral">
-                        </div>
-                        <div class="input-group">
-                            <label for="inputIzin">Jenis Izin</label>
-                            <select id="inputIzin">
-                                <option value="SIPB">SIPB</option>
-                                <option value="IUP OP">IUP OP</option>
-                                <option value="IUP Eksplorasi">IUP Eksplorasi</option>
-                                <option value="WPR">WPR</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label for="inputStatus">Status</label>
-                            <select id="inputStatus">
-                                <option value="Aktif">Aktif</option>
-                                <option value="Dalam Proses">Dalam Proses</option>
-                                <option value="Masa Berlaku Habis">Masa Berlaku Habis</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label for="inputKomoditas">Komoditas</label>
-                            <input type="text" id="inputKomoditas" placeholder="Contoh: Pasir">
-                        </div>
-                        <div class="input-group">
-                            <label for="inputKabupaten">Kabupaten</label>
-                            <input type="text" id="inputKabupaten">
-                        </div>
-                        <div class="input-group">
-                            <label for="inputKecamatan">Kecamatan</label>
-                            <input type="text" id="inputKecamatan">
-                        </div>
-                        <div class="input-group">
-                            <label for="inputDesa">Desa</label>
-                            <input type="text" id="inputDesa">
-                        </div>
-                        <div class="input-group">
-                            <label for="inputArea">Luas Area (Ha)</label>
-                            <input type="number" id="inputArea" step="0.01" min="0" placeholder="0">
-                        </div>
-                        <div class="input-group">
-                            <label for="inputNomorSk">Nomor SK</label>
-                            <input type="text" id="inputNomorSk">
-                        </div>
-                        <div class="input-group">
-                            <label for="inputTanggalSk">Tanggal SK</label>
-                            <input type="date" id="inputTanggalSk">
-                        </div>
-                        <div class="input-group">
-                            <label for="inputMasa">Masa Berlaku</label>
-                            <input type="text" id="inputMasa" placeholder="Contoh: 3 Tahun">
-                        </div>
                         <div class="input-group input-group--full">
-                            <label for="inputKoordinatFile">File Excel Koordinat</label>
-                            <input type="file" id="inputKoordinatFile" accept=".xlsx,.xls">
+                            <label for="inputGeojsonFile">File GeoJSON Izin</label>
+                            <input type="file" id="inputGeojsonFile" accept=".geojson,.json,application/geo+json,application/json">
                         </div>
                     </div>
                     <div class="input-help">
-                        File Excel contoh yang kamu kirim terbaca dengan kolom `No`, `X`, dan `Y`. Upload file `.xlsx/.xls` dengan pola itu, dan polygon akan dibentuk otomatis dari koordinat di file.
+                        Upload file `.geojson/.json` bertipe `FeatureCollection` atau `Feature`. Gunakan properti seperti `Nama`, `Izin`, `Status`, `Komoditas`, `Kabupaten`, `Kecamatan`, `Desa`, `Area`, `Nomor_SK`, `Tanggal`, `Masa`, `RKAB`, dan `Dok_Teknis`. Geometri yang didukung: `Polygon` atau `MultiPolygon`.
                     </div>
                     <div class="input-actions">
-                        <button type="button" class="primary-btn" id="addPolygonButton">Tambah Polygon</button>
-                        <span class="form-status" id="inputFormStatus">Polygon yang ditambahkan akan tampil di peta pada sesi ini.</span>
+                        <button type="button" class="primary-btn" id="addGeojsonButton">Tambah Data Izin dari GeoJSON</button>
+                        <span class="form-status" id="inputFormStatus">Pilih file GeoJSON izin, lalu tambahkan datanya ke peta pada sesi ini.</span>
                     </div>
                 </div>
 
@@ -1811,7 +1683,7 @@
         let dokTeknisChart = null;
         let komoditasBarChart = null;
         let customFeatureId = 100000;
-        let uploadedCoordinates = null;
+        let uploadedGeoJsonFeatures = [];
         let wiupPreviewCoordinates = null;
         let wiupPreviewLayer = null;
         let wprAreaPreviewCoordinates = null;
@@ -1820,7 +1692,7 @@
         let currentLocationAccuracy = null;
         let petiMarkerLayer = null;
         let petiPoints = [];
-        let petiCoordinateFormat = 'dd';
+        let uploadedPetiGeoJsonPoints = [];
         let currentUserRole = 'viewer';
         let petiSyncIntervalId = null;
         let petiSyncInFlight = false;
@@ -2202,61 +2074,6 @@
                 .replace(/'/g, '&#39;');
         }
 
-        function switchPetiCoordinateFormat(format) {
-            petiCoordinateFormat = format === 'dms' ? 'dms' : 'dd';
-            document.getElementById('petiDdPanel').classList.toggle('is-active', petiCoordinateFormat === 'dd');
-            document.getElementById('petiDmsPanel').classList.toggle('is-active', petiCoordinateFormat === 'dms');
-            document.getElementById('petiFormatDdButton').classList.toggle('is-active', petiCoordinateFormat === 'dd');
-            document.getElementById('petiFormatDmsButton').classList.toggle('is-active', petiCoordinateFormat === 'dms');
-        }
-
-        function convertDmsToDecimal(degrees, minutes, seconds, hemisphere, axisLabel) {
-            if (!Number.isFinite(degrees) || !Number.isFinite(minutes) || !Number.isFinite(seconds)) {
-                throw new Error(`Koordinat ${axisLabel} DMS belum lengkap.`);
-            }
-
-            if (minutes < 0 || minutes >= 60 || seconds < 0 || seconds >= 60) {
-                throw new Error(`Nilai menit/detik koordinat ${axisLabel} tidak valid.`);
-            }
-
-            let decimal = Math.abs(degrees) + (minutes / 60) + (seconds / 3600);
-            if (hemisphere === 'S' || hemisphere === 'W') {
-                decimal *= -1;
-            }
-            return decimal;
-        }
-
-        function getPetiCoordinates() {
-            if (petiCoordinateFormat === 'dd') {
-                const longitude = Number(document.getElementById('petiLongitudeDd').value);
-                const latitude = Number(document.getElementById('petiLatitudeDd').value);
-
-                if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
-                    throw new Error('Koordinat X dan Y dalam Decimal Degree wajib diisi.');
-                }
-
-                return { longitude, latitude };
-            }
-
-            const longitude = convertDmsToDecimal(
-                Number(document.getElementById('petiLongitudeDeg').value),
-                Number(document.getElementById('petiLongitudeMin').value),
-                Number(document.getElementById('petiLongitudeSec').value),
-                document.getElementById('petiLongitudeHemisphere').value,
-                'X'
-            );
-
-            const latitude = convertDmsToDecimal(
-                Number(document.getElementById('petiLatitudeDeg').value),
-                Number(document.getElementById('petiLatitudeMin').value),
-                Number(document.getElementById('petiLatitudeSec').value),
-                document.getElementById('petiLatitudeHemisphere').value,
-                'Y'
-            );
-
-            return { longitude, latitude };
-        }
-
         function validateLatitudeLongitude(latitude, longitude) {
             if (latitude < -90 || latitude > 90) {
                 throw new Error('Latitude/Y harus berada pada rentang -90 sampai 90.');
@@ -2303,6 +2120,222 @@
 
         function writePetiLocalState(key, value) {
             localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = event => resolve(String(event.target?.result || ''));
+                reader.onerror = () => reject(new Error('File GeoJSON PETI tidak dapat dibaca.'));
+                reader.readAsText(file);
+            });
+        }
+
+        function pickFirstValue(source, keys, fallback = '') {
+            for (const key of keys) {
+                if (!source || !Object.prototype.hasOwnProperty.call(source, key)) continue;
+                const value = source[key];
+                if (value !== null && value !== undefined && String(value).trim() !== '') {
+                    return value;
+                }
+            }
+
+            return fallback;
+        }
+
+        function normalizePetiGeoJsonInput(geojson) {
+            if (!geojson || typeof geojson !== 'object') {
+                throw new Error('GeoJSON PETI harus berupa object.');
+            }
+
+            if (geojson.type === 'Feature') {
+                return {
+                    type: 'FeatureCollection',
+                    features: [geojson]
+                };
+            }
+
+            if (geojson.type !== 'FeatureCollection' || !Array.isArray(geojson.features)) {
+                throw new Error('GeoJSON PETI harus bertipe FeatureCollection atau Feature.');
+            }
+
+            return geojson;
+        }
+
+        function getPetiFeatureRepresentativeCoordinates(feature, index) {
+            const geometry = feature?.geometry;
+            if (!geometry || typeof geometry !== 'object') {
+                throw new Error(`Feature PETI ke-${index + 1} belum memiliki geometry.`);
+            }
+
+            if (geometry.type === 'Point' && Array.isArray(geometry.coordinates) && geometry.coordinates.length >= 2) {
+                const longitude = Number(geometry.coordinates[0]);
+                const latitude = Number(geometry.coordinates[1]);
+                if (Number.isFinite(longitude) && Number.isFinite(latitude)) {
+                    return { longitude, latitude };
+                }
+            }
+
+            if (typeof turf !== 'undefined') {
+                try {
+                    const centerFeature = turf.centerOfMass(feature);
+                    const coords = centerFeature?.geometry?.coordinates;
+                    if (Array.isArray(coords) && coords.length >= 2) {
+                        const longitude = Number(coords[0]);
+                        const latitude = Number(coords[1]);
+                        if (Number.isFinite(longitude) && Number.isFinite(latitude)) {
+                            return { longitude, latitude };
+                        }
+                    }
+                } catch (error) {
+                    // lanjut ke error umum di bawah
+                }
+            }
+
+            throw new Error(`Koordinat feature PETI ke-${index + 1} tidak dapat dibaca.`);
+        }
+
+        function normalizePetiTanggalValue(value) {
+            if (value === '' || value === null || typeof value === 'undefined') {
+                return null;
+            }
+
+            if (typeof value === 'number' && Number.isFinite(value)) {
+                return value > 100000000000 ? value : value * 1000;
+            }
+
+            const parsed = Date.parse(String(value));
+            return Number.isFinite(parsed) ? parsed : null;
+        }
+
+        function normalizeIzinTanggalValue(value) {
+            if (value === '' || value === null || typeof value === 'undefined') {
+                return null;
+            }
+
+            if (typeof value === 'number' && Number.isFinite(value)) {
+                return value > 100000000000 ? value : value * 1000;
+            }
+
+            const parsed = Date.parse(String(value));
+            return Number.isFinite(parsed) ? parsed : null;
+        }
+
+        function normalizeInputGeoJson(geojson) {
+            if (!geojson || typeof geojson !== 'object') {
+                throw new Error('GeoJSON izin harus berupa object.');
+            }
+
+            if (geojson.type === 'Feature') {
+                return {
+                    type: 'FeatureCollection',
+                    features: [geojson]
+                };
+            }
+
+            if (geojson.type !== 'FeatureCollection' || !Array.isArray(geojson.features)) {
+                throw new Error('GeoJSON izin harus bertipe FeatureCollection atau Feature.');
+            }
+
+            return geojson;
+        }
+
+        function calculateAreaInHa(feature) {
+            if (typeof turf === 'undefined') {
+                return 0;
+            }
+
+            try {
+                return turf.area(feature) / 10000;
+            } catch (error) {
+                return 0;
+            }
+        }
+
+        function normalizeInputFeature(feature, index) {
+            if (!feature || typeof feature !== 'object' || feature.type !== 'Feature') {
+                throw new Error(`Feature izin ke-${index + 1} tidak valid.`);
+            }
+
+            const geometry = feature.geometry;
+            if (!geometry || typeof geometry !== 'object') {
+                throw new Error(`Feature izin ke-${index + 1} belum memiliki geometry.`);
+            }
+
+            if (geometry.type !== 'Polygon' && geometry.type !== 'MultiPolygon') {
+                throw new Error(`Feature izin ke-${index + 1} harus bertipe Polygon atau MultiPolygon.`);
+            }
+
+            const properties = feature.properties && typeof feature.properties === 'object' ? feature.properties : {};
+            const nama = String(pickFirstValue(properties, ['Nama', 'nama', 'name'], '')).trim();
+            const izin = String(pickFirstValue(properties, ['Izin', 'izin', 'jenis_izin', 'jenisIzin'], '')).trim();
+
+            if (!nama) {
+                throw new Error(`Feature izin ke-${index + 1} wajib memiliki properti Nama.`);
+            }
+
+            if (!izin) {
+                throw new Error(`Feature izin ke-${index + 1} wajib memiliki properti Izin.`);
+            }
+
+            const areaValue = Number(pickFirstValue(properties, ['Area', 'area', 'luas', 'luas_area'], 0));
+            const normalizedFeature = {
+                type: 'Feature',
+                id: customFeatureId++,
+                geometry: {
+                    type: geometry.type,
+                    coordinates: geometry.coordinates
+                },
+                properties: {
+                    Nama: nama,
+                    Komoditas: String(pickFirstValue(properties, ['Komoditas', 'komoditas'], '')).trim(),
+                    Area: Number.isFinite(areaValue) && areaValue > 0 ? areaValue : calculateAreaInHa(feature),
+                    Status: String(pickFirstValue(properties, ['Status', 'status'], '')).trim(),
+                    Izin: izin,
+                    Nomor_SK: String(pickFirstValue(properties, ['Nomor_SK', 'nomor_sk', 'nomorSK', 'nomor sk'], '')).trim(),
+                    Masa: String(pickFirstValue(properties, ['Masa', 'masa', 'masa_berlaku', 'masaBerlaku'], '')).trim(),
+                    Tanggal: normalizeIzinTanggalValue(pickFirstValue(properties, ['Tanggal', 'tanggal', 'Tanggal_SK', 'tanggal_sk', 'tanggalSK'], null)),
+                    Kabupaten: String(pickFirstValue(properties, ['Kabupaten', 'kabupaten'], '')).trim(),
+                    Kecamatan: String(pickFirstValue(properties, ['Kecamatan', 'kecamatan'], '')).trim(),
+                    Desa: String(pickFirstValue(properties, ['Desa', 'desa'], '')).trim(),
+                    RKAB: String(pickFirstValue(properties, ['RKAB', 'rkab'], '')).trim(),
+                    Dok_Teknis: String(pickFirstValue(properties, ['Dok_Teknis', 'dok_teknis', 'dokTeknis'], '')).trim()
+                }
+            };
+
+            return normalizedFeature;
+        }
+
+        function convertInputGeoJsonToFeatures(geojson) {
+            const normalized = normalizeInputGeoJson(geojson);
+            return normalized.features.map((feature, index) => normalizeInputFeature(feature, index));
+        }
+
+        function convertPetiGeoJsonToPoints(geojson) {
+            const normalized = normalizePetiGeoJsonInput(geojson);
+
+            return normalized.features.map((feature, index) => {
+                if (!feature || typeof feature !== 'object' || feature.type !== 'Feature') {
+                    throw new Error(`Feature PETI ke-${index + 1} tidak valid.`);
+                }
+
+                const properties = feature.properties && typeof feature.properties === 'object' ? feature.properties : {};
+                const coordinates = getPetiFeatureRepresentativeCoordinates(feature, index);
+                validateLatitudeLongitude(coordinates.latitude, coordinates.longitude);
+
+                const fallbackId = `peti-geojson-${Date.now()}-${index + 1}`;
+                return {
+                    id: String(properties.id || '').trim() || fallbackId,
+                    nama: String(properties.nama || properties.name || `PETI ${index + 1}`).trim(),
+                    komoditas: String(properties.komoditas || '').trim(),
+                    sumber: String(properties.sumber || '').trim(),
+                    tanggal: normalizePetiTanggalValue(properties.tanggal),
+                    longitude: coordinates.longitude,
+                    latitude: coordinates.latitude,
+                    keterangan: String(properties.keterangan || properties.description || '').trim(),
+                    photoDataUrl: String(properties.photoDataUrl || '').trim()
+                };
+            });
         }
 
         async function loadBundledPetiPoints() {
@@ -2357,6 +2390,32 @@
                 return {
                     success: true,
                     message: 'Titik PETI berhasil disimpan di browser ini.',
+                    points: mergePetiPoints(bundledPoints, nextAddedPoints, deletedIds)
+                };
+            }
+
+            if (payload.action === 'import_geojson') {
+                const importedPoints = Array.isArray(payload.points) ? payload.points : [];
+                const importedIds = new Set();
+                const nextAddedMap = new Map(
+                    addedPoints.map(point => [String(point?.id || ''), point]).filter(entry => entry[0])
+                );
+
+                importedPoints.forEach(point => {
+                    const pointId = String(point?.id || '');
+                    if (!pointId) return;
+                    importedIds.add(pointId);
+                    nextAddedMap.set(pointId, point);
+                });
+
+                const nextAddedPoints = Array.from(nextAddedMap.values());
+                deletedIds = deletedIds.filter(id => !importedIds.has(String(id)));
+                writePetiLocalState(PETI_LOCAL_ADDED_KEY, nextAddedPoints);
+                writePetiLocalState(PETI_LOCAL_DELETED_KEY, deletedIds);
+
+                return {
+                    success: true,
+                    message: 'Data PETI GeoJSON berhasil disimpan di browser ini.',
                     points: mergePetiPoints(bundledPoints, nextAddedPoints, deletedIds)
                 };
             }
@@ -2416,11 +2475,11 @@
             });
         }
 
-        function renderPetiTable() {
+        function renderPetiTable(points = petiPoints) {
             const petiTableBody = document.getElementById('petiTableBody');
             const canEdit = isEditor();
 
-            if (!petiPoints.length) {
+            if (!points.length) {
                 petiTableBody.innerHTML = `
                     <tr>
                         <td colspan="9" class="empty-table">Belum ada titik PETI yang diinput.</td>
@@ -2429,7 +2488,7 @@
                 return;
             }
 
-            petiTableBody.innerHTML = petiPoints.map(point => `
+            petiTableBody.innerHTML = points.map(point => `
                 <tr>
                     <td>${safeHtml(point.nama || '-')}</td>
                     <td>${safeHtml(point.komoditas || '-')}</td>
@@ -2505,76 +2564,37 @@
             });
         }
 
-        function resetPetiForm() {
-            document.getElementById('petiNama').value = '';
-            document.getElementById('petiKomoditas').value = '';
-            document.getElementById('petiSumber').value = '';
-            document.getElementById('petiTanggal').value = '';
-            document.getElementById('petiLongitudeDd').value = '';
-            document.getElementById('petiLatitudeDd').value = '';
-            document.getElementById('petiLongitudeDeg').value = '';
-            document.getElementById('petiLongitudeMin').value = '';
-            document.getElementById('petiLongitudeSec').value = '';
-            document.getElementById('petiLatitudeDeg').value = '';
-            document.getElementById('petiLatitudeMin').value = '';
-            document.getElementById('petiLatitudeSec').value = '';
-            document.getElementById('petiLongitudeHemisphere').value = 'E';
-            document.getElementById('petiLatitudeHemisphere').value = 'N';
-            document.getElementById('petiKeterangan').value = '';
-            document.getElementById('petiFoto').value = '';
-            switchPetiCoordinateFormat('dd');
+        async function loadPetiGeoJsonFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const content = await readFileAsText(file);
+                const parsed = JSON.parse(content);
+                uploadedPetiGeoJsonPoints = convertPetiGeoJsonToPoints(parsed);
+                setPetiFormStatus(`File GeoJSON PETI "${file.name}" berhasil dibaca. ${uploadedPetiGeoJsonPoints.length} feature siap ditambahkan.`, 'success');
+            } catch (error) {
+                uploadedPetiGeoJsonPoints = [];
+                setPetiFormStatus(error.message, 'error');
+            }
         }
 
-        function readFileAsDataUrl(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = event => resolve(event.target.result);
-                reader.onerror = () => reject(new Error('Foto gagal dibaca.'));
-                reader.readAsDataURL(file);
-            });
-        }
-
-        async function savePetiPoint() {
+        async function savePetiGeoJson() {
             try {
                 if (!requireEditorAccess()) return;
-
-                const nama = getInputValue('petiNama');
-                const komoditas = getInputValue('petiKomoditas');
-                const sumber = getInputValue('petiSumber');
-
-                if (!nama) throw new Error('Nama/lokasi PETI wajib diisi.');
-                if (!komoditas) throw new Error('Komoditas PETI wajib dipilih.');
-                if (!sumber) throw new Error('Sumber data PETI wajib dipilih.');
-
-                const coordinates = getPetiCoordinates();
-                validateLatitudeLongitude(coordinates.latitude, coordinates.longitude);
-
-                const photoFile = document.getElementById('petiFoto').files[0];
-                let photoDataUrl = '';
-                if (photoFile) {
-                    photoDataUrl = await readFileAsDataUrl(photoFile);
+                if (!uploadedPetiGeoJsonPoints.length) {
+                    throw new Error('Pilih file GeoJSON PETI terlebih dahulu.');
                 }
 
-                const newPoint = {
-                    id: `peti-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-                    nama,
-                    komoditas,
-                    sumber,
-                    tanggal: document.getElementById('petiTanggal').value ? new Date(document.getElementById('petiTanggal').value).getTime() : null,
-                    longitude: coordinates.longitude,
-                    latitude: coordinates.latitude,
-                    keterangan: getInputValue('petiKeterangan'),
-                    photoDataUrl
-                };
-
                 const result = await requestPetiApi({
-                    action: 'add',
-                    point: newPoint
+                    action: 'import_geojson',
+                    points: uploadedPetiGeoJsonPoints
                 });
 
                 applyPetiPoints(result.points || []);
-                resetPetiForm();
-                setPetiFormStatus(`Titik PETI "${nama}" berhasil ditambahkan ke peta dan tabel atribut.`, 'success');
+                document.getElementById('petiGeojsonFile').value = '';
+                setPetiFormStatus(`${uploadedPetiGeoJsonPoints.length} data PETI dari GeoJSON berhasil ditambahkan ke peta dan tabel atribut.`, 'success');
+                uploadedPetiGeoJsonPoints = [];
             } catch (error) {
                 setPetiFormStatus(error.message, 'error');
             }
@@ -2725,36 +2745,19 @@
             return coordinates;
         }
 
-        function loadCoordinatesFromExcel(event) {
+        async function loadInputGeoJsonFromFile(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            if (typeof XLSX === 'undefined') {
-                setInputFormStatus('Library pembaca Excel tidak tersedia.', 'error');
-                return;
+            try {
+                const content = await readFileAsText(file);
+                const parsed = JSON.parse(content);
+                uploadedGeoJsonFeatures = convertInputGeoJsonToFeatures(parsed);
+                setInputFormStatus(`File GeoJSON izin "${file.name}" berhasil dibaca. ${uploadedGeoJsonFeatures.length} feature siap ditambahkan ke peta.`, 'success');
+            } catch (error) {
+                uploadedGeoJsonFeatures = [];
+                setInputFormStatus(error.message, 'error');
             }
-
-            const reader = new FileReader();
-            reader.onload = function(loadEvent) {
-                try {
-                    const workbook = XLSX.read(loadEvent.target.result, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-                    uploadedCoordinates = parseCoordinatesFromWorksheetRows(rows);
-                    setInputFormStatus(`Koordinat dari file Excel "${file.name}" berhasil dibaca. Siap ditambahkan ke peta.`, 'success');
-                } catch (error) {
-                    uploadedCoordinates = null;
-                    setInputFormStatus(error.message, 'error');
-                }
-            };
-
-            reader.onerror = function() {
-                uploadedCoordinates = null;
-                setInputFormStatus('File Excel tidak dapat dibaca.', 'error');
-            };
-
-            reader.readAsArrayBuffer(file);
         }
 
         function loadWiupCoordinatesFromExcel(event) {
@@ -2970,54 +2973,22 @@
         function addPolygonFromInput() {
             try {
                 if (!requireEditorAccess()) return;
-
-                const nama = getInputValue('inputNama');
-                const izin = getInputValue('inputIzin');
-
-                if (!nama) {
-                    throw new Error('Nama wajib diisi.');
+                if (!uploadedGeoJsonFeatures.length) {
+                    throw new Error('File GeoJSON izin wajib dipilih dan berhasil dibaca.');
                 }
-
-                if (!uploadedCoordinates || !uploadedCoordinates.length) {
-                    throw new Error('File Excel koordinat wajib dipilih dan berhasil dibaca.');
-                }
-
-                const coordinates = uploadedCoordinates.map(point => [point[0], point[1]]);
-                const tanggalSkValue = document.getElementById('inputTanggalSk').value;
 
                 if (!allData) {
                     allData = { type: 'FeatureCollection', features: [] };
                 }
 
-                allData.features.push({
-                    type: 'Feature',
-                    id: customFeatureId++,
-                    geometry: {
-                        type: 'Polygon',
-                        coordinates: [coordinates]
-                    },
-                    properties: {
-                        Nama: nama,
-                        Komoditas: getInputValue('inputKomoditas'),
-                        Area: Number(document.getElementById('inputArea').value || 0),
-                        Status: getInputValue('inputStatus'),
-                        Izin: izin,
-                        Nomor_SK: getInputValue('inputNomorSk'),
-                        Masa: getInputValue('inputMasa'),
-                        Tanggal: tanggalSkValue ? new Date(tanggalSkValue).getTime() : null,
-                        Kabupaten: getInputValue('inputKabupaten'),
-                        Kecamatan: getInputValue('inputKecamatan'),
-                        Desa: getInputValue('inputDesa'),
-                        RKAB: '',
-                        Dok_Teknis: ''
-                    }
-                });
+                allData.features = allData.features.concat(uploadedGeoJsonFeatures);
 
                 refreshFiltersPreserveSelection();
                 applyFilters();
-                document.getElementById('inputKoordinatFile').value = '';
-                uploadedCoordinates = null;
-                setInputFormStatus(`Polygon "${nama}" berhasil ditambahkan ke peta.`, 'success');
+                document.getElementById('inputGeojsonFile').value = '';
+                const addedCount = uploadedGeoJsonFeatures.length;
+                uploadedGeoJsonFeatures = [];
+                setInputFormStatus(`${addedCount} data izin dari GeoJSON berhasil ditambahkan ke peta.`, 'success');
             } catch (error) {
                 setInputFormStatus(error.message, 'error');
             }
@@ -3048,8 +3019,10 @@
                 features: filteredFeatures
             };
 
+            const filteredPetiPoints = getFilteredPetiPoints();
             renderMap(filteredData);
-            renderPetiMarkers(getFilteredPetiPoints());
+            renderPetiMarkers(filteredPetiPoints);
+            renderPetiTable(filteredPetiPoints);
             updateTable(filteredData);
             updateCards(filteredData);
             updateCharts(filteredData);
@@ -3661,21 +3634,16 @@
         document.getElementById('filterKecamatan').addEventListener('change', applyFilters);
         document.getElementById('filterIzin').addEventListener('change', applyFilters);
         document.getElementById('filterStatus').addEventListener('change', applyFilters);
-        document.getElementById('inputKoordinatFile').addEventListener('change', loadCoordinatesFromExcel);
+        document.getElementById('inputGeojsonFile').addEventListener('change', loadInputGeoJsonFromFile);
         document.getElementById('wiupKoordinatFile').addEventListener('change', loadWiupCoordinatesFromExcel);
         document.getElementById('wprKoordinatFile').addEventListener('change', loadWprAreaCoordinatesFromExcel);
-        document.getElementById('addPolygonButton').addEventListener('click', addPolygonFromInput);
+        document.getElementById('addGeojsonButton').addEventListener('click', addPolygonFromInput);
         document.getElementById('checkWiupButton').addEventListener('click', previewWiupPolygon);
         document.getElementById('checkWprAreaButton').addEventListener('click', previewWprAreaPolygon);
         document.getElementById('locateMeButton').addEventListener('click', showCurrentLocation);
         document.getElementById('clearLocationButton').addEventListener('click', clearCurrentLocation);
-        document.getElementById('savePetiButton').addEventListener('click', savePetiPoint);
-        document.getElementById('petiFormatDdButton').addEventListener('click', function() {
-            switchPetiCoordinateFormat('dd');
-        });
-        document.getElementById('petiFormatDmsButton').addEventListener('click', function() {
-            switchPetiCoordinateFormat('dms');
-        });
+        document.getElementById('petiGeojsonFile').addEventListener('change', loadPetiGeoJsonFromFile);
+        document.getElementById('savePetiGeojsonButton').addEventListener('click', savePetiGeoJson);
         document.getElementById('petiTableBody').addEventListener('click', function(event) {
             const deleteId = event.target.getAttribute('data-peti-delete-id');
             if (!deleteId) return;
