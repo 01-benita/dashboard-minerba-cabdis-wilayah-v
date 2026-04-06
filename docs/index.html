@@ -283,7 +283,7 @@
         }
 
         .table-focus-btn.is-temporary-active {
-            color: #7c3aed;
+            color: #1f8f4d;
             text-decoration: underline;
             text-underline-offset: 2px;
         }
@@ -1642,6 +1642,63 @@
                     </div>
                 </div>
 
+                <div class="panel preview-panel" id="manual-point-check-panel">
+                    <h3>Cek Titik Koordinat Manual</h3>
+                    <div class="coord-format-toggle">
+                        <button type="button" class="is-active" id="manualPointDdButton">Decimal Degree</button>
+                        <button type="button" id="manualPointDmsButton">DMS</button>
+                    </div>
+                    <div class="input-grid">
+                        <div class="input-group input-group--full coord-panel is-active" id="manualPointDdPanel">
+                            <div class="input-grid">
+                                <div class="input-group">
+                                    <label for="manualPointLongitudeDd">Koordinat X / Longitude (Decimal Degree)</label>
+                                    <input type="number" id="manualPointLongitudeDd" step="0.000001" placeholder="98.852876">
+                                </div>
+                                <div class="input-group">
+                                    <label for="manualPointLatitudeDd">Koordinat Y / Latitude (Decimal Degree)</label>
+                                    <input type="number" id="manualPointLatitudeDd" step="0.000001" placeholder="1.715991">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group input-group--full coord-panel" id="manualPointDmsPanel">
+                            <div class="input-grid">
+                                <div class="input-group">
+                                    <label>Koordinat X / Longitude (DMS)</label>
+                                    <div class="dms-grid">
+                                        <input type="number" id="manualPointLongitudeDeg" placeholder="98">
+                                        <input type="number" id="manualPointLongitudeMin" placeholder="51">
+                                        <input type="number" id="manualPointLongitudeSec" step="0.01" placeholder="10.35">
+                                        <select id="manualPointLongitudeHemisphere">
+                                            <option value="E">E</option>
+                                            <option value="W">W</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label>Koordinat Y / Latitude (DMS)</label>
+                                    <div class="dms-grid">
+                                        <input type="number" id="manualPointLatitudeDeg" placeholder="1">
+                                        <input type="number" id="manualPointLatitudeMin" placeholder="42">
+                                        <input type="number" id="manualPointLatitudeSec" step="0.01" placeholder="57.57">
+                                        <select id="manualPointLatitudeHemisphere">
+                                            <option value="N">N</option>
+                                            <option value="S">S</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-help">
+                        Masukkan satu titik koordinat secara manual untuk ditampilkan di peta dan dicek apakah berada di dalam area polygon WPR yang tersedia.
+                    </div>
+                    <div class="input-actions">
+                        <button type="button" class="outline-btn" id="checkManualPointButton">Cek Titik Manual</button>
+                        <span class="form-status" id="manualPointFormStatus">Belum ada titik manual yang dicek.</span>
+                    </div>
+                </div>
+
                 <div class="panel panel-wide" id="chart-panel">
                     <h3>Jenis Izin</h3>
                     <div class="chart-wrap chart-wrap--medium">
@@ -1719,6 +1776,8 @@
         let wiupPreviewLayer = null;
         let wprAreaPreviewCoordinates = null;
         let wprAreaPreviewLayer = null;
+        let manualPointCoordinateFormat = 'dd';
+        let manualPointMarker = null;
         let currentLocationMarker = null;
         let currentLocationAccuracy = null;
         let petiMarkerLayer = null;
@@ -2096,6 +2155,15 @@
             if (type === 'success') statusEl.classList.add('is-success');
         }
 
+        function setManualPointFormStatus(message, type) {
+            const statusEl = document.getElementById('manualPointFormStatus');
+            statusEl.textContent = message;
+            statusEl.className = 'form-status';
+
+            if (type === 'error') statusEl.classList.add('is-error');
+            if (type === 'success') statusEl.classList.add('is-success');
+        }
+
         function setMapLocationStatus(message, type) {
             const statusEl = document.getElementById('mapLocationStatus');
             statusEl.textContent = message;
@@ -2122,6 +2190,61 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
+        }
+
+        function convertDmsToDecimal(degrees, minutes, seconds, hemisphere, axisLabel) {
+            if (!Number.isFinite(degrees) || !Number.isFinite(minutes) || !Number.isFinite(seconds)) {
+                throw new Error(`Koordinat ${axisLabel} DMS belum lengkap.`);
+            }
+
+            if (minutes < 0 || minutes >= 60 || seconds < 0 || seconds >= 60) {
+                throw new Error(`Nilai menit/detik koordinat ${axisLabel} tidak valid.`);
+            }
+
+            let decimal = Math.abs(degrees) + (minutes / 60) + (seconds / 3600);
+            if (hemisphere === 'S' || hemisphere === 'W') {
+                decimal *= -1;
+            }
+            return decimal;
+        }
+
+        function switchManualPointCoordinateFormat(format) {
+            manualPointCoordinateFormat = format === 'dms' ? 'dms' : 'dd';
+            document.getElementById('manualPointDdPanel').classList.toggle('is-active', manualPointCoordinateFormat === 'dd');
+            document.getElementById('manualPointDmsPanel').classList.toggle('is-active', manualPointCoordinateFormat === 'dms');
+            document.getElementById('manualPointDdButton').classList.toggle('is-active', manualPointCoordinateFormat === 'dd');
+            document.getElementById('manualPointDmsButton').classList.toggle('is-active', manualPointCoordinateFormat === 'dms');
+        }
+
+        function getManualPointCoordinates() {
+            if (manualPointCoordinateFormat === 'dd') {
+                const longitude = Number(document.getElementById('manualPointLongitudeDd').value);
+                const latitude = Number(document.getElementById('manualPointLatitudeDd').value);
+
+                if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
+                    throw new Error('Koordinat X dan Y dalam Decimal Degree wajib diisi.');
+                }
+
+                return { longitude, latitude };
+            }
+
+            const longitude = convertDmsToDecimal(
+                Number(document.getElementById('manualPointLongitudeDeg').value),
+                Number(document.getElementById('manualPointLongitudeMin').value),
+                Number(document.getElementById('manualPointLongitudeSec').value),
+                document.getElementById('manualPointLongitudeHemisphere').value,
+                'X'
+            );
+
+            const latitude = convertDmsToDecimal(
+                Number(document.getElementById('manualPointLatitudeDeg').value),
+                Number(document.getElementById('manualPointLatitudeMin').value),
+                Number(document.getElementById('manualPointLatitudeSec').value),
+                document.getElementById('manualPointLatitudeHemisphere').value,
+                'Y'
+            );
+
+            return { longitude, latitude };
         }
 
         function validateLatitudeLongitude(latitude, longitude) {
@@ -3183,6 +3306,75 @@
             }
         }
 
+        function checkPointWithinWpr(longitude, latitude) {
+            if (!allData || !Array.isArray(allData.features)) {
+                return {
+                    inside: false,
+                    matches: []
+                };
+            }
+
+            const pointFeature = turf.point([longitude, latitude]);
+            const matches = allData.features.filter(feature => {
+                const izin = String(feature?.properties?.Izin || '').trim();
+                if (izin !== 'WPR') return false;
+
+                try {
+                    return turf.booleanPointInPolygon(pointFeature, feature);
+                } catch (error) {
+                    return false;
+                }
+            });
+
+            return {
+                inside: matches.length > 0,
+                matches
+            };
+        }
+
+        function previewManualPoint() {
+            try {
+                const coordinates = getManualPointCoordinates();
+                validateLatitudeLongitude(coordinates.latitude, coordinates.longitude);
+
+                if (manualPointMarker) {
+                    map.removeLayer(manualPointMarker);
+                }
+
+                manualPointMarker = L.circleMarker([coordinates.latitude, coordinates.longitude], {
+                    radius: 9,
+                    color: '#7c3aed',
+                    weight: 3,
+                    fillColor: '#c4b5fd',
+                    fillOpacity: 0.9
+                }).addTo(map);
+
+                const checkResult = checkPointWithinWpr(coordinates.longitude, coordinates.latitude);
+                const popupContent = `
+                    <div class="popup-card">
+                        <div class="popup-title">Titik Manual</div>
+                        <b>Longitude:</b> ${formatCoordinate(coordinates.longitude)}<br>
+                        <b>Latitude:</b> ${formatCoordinate(coordinates.latitude)}
+                    </div>
+                `;
+
+                manualPointMarker.bindPopup(popupContent).openPopup();
+                map.setView([coordinates.latitude, coordinates.longitude], 15);
+
+                if (!checkResult.inside) {
+                    setManualPointFormStatus('Titik manual berhasil ditampilkan, namun berada di luar area polygon WPR.', 'error');
+                } else {
+                    const sampleNames = checkResult.matches
+                        .slice(0, 3)
+                        .map(feature => feature.properties.Nama || 'WPR')
+                        .join(', ');
+                    setManualPointFormStatus(`Titik manual berhasil ditampilkan dan berada di dalam polygon WPR: ${sampleNames}.`, 'success');
+                }
+            } catch (error) {
+                setManualPointFormStatus(error.message, 'error');
+            }
+        }
+
         function getInputValue(id) {
             return document.getElementById(id).value.trim();
         }
@@ -3557,6 +3749,32 @@
             return counts;
         }
 
+        function classifyRkabStatus(rkabValue) {
+            const rkab = String(rkabValue || '').trim().toLowerCase();
+
+            if (!rkab || rkab === '-') {
+                return 'Tidak ada kegiatan';
+            }
+
+            if (rkab.includes('tidak ada kegiatan')) {
+                return 'Tidak ada kegiatan';
+            }
+
+            if (rkab.includes('pengajuan')) {
+                return 'Proses Pengajuan';
+            }
+
+            if (rkab.includes('penandatanganan')) {
+                return 'Proses Penandatanganan Persetujuan';
+            }
+
+            if (/^\d+\//.test(rkab) || rkab.includes('dppesdm') || rkab.includes('persetujuan')) {
+                return 'Sudah Mendapat Persetujuan';
+            }
+
+            return 'Sudah Mendapat Persetujuan';
+        }
+
         function getRKAB_IUP(features) {
             const result = {
                 "Tidak ada kegiatan": 0,
@@ -3567,24 +3785,11 @@
 
             features.forEach(f => {
                 const izin = (f.properties.Izin || '').toLowerCase();
-                const rkab = (f.properties.RKAB || '').toLowerCase();
 
                 // hanya IUP OP & Eksplorasi
                 if (izin === 'iup op' || izin === 'iup eksplorasi') {
-
-                    if (rkab.includes('tidak ada kegiatan')) {
-                        result["Tidak ada kegiatan"]++;
-
-                    } else if (rkab.includes('pengajuan')) {
-                        result["Proses Pengajuan"]++;
-
-                    } else if (rkab.includes('penandatanganan')) {
-                        result["Proses Penandatanganan Persetujuan"]++;
-
-                    } else {
-                        // ðŸ”¥ semua sisanya masuk sini
-                        result["Sudah Mendapat Persetujuan"]++;
-                    }
+                    const status = classifyRkabStatus(f.properties.RKAB || '');
+                    result[status]++;
                 }
             });
 
@@ -3868,6 +4073,13 @@
         document.getElementById('addGeojsonButton').addEventListener('click', addPolygonFromInput);
         document.getElementById('checkWiupButton').addEventListener('click', previewWiupPolygon);
         document.getElementById('checkWprAreaButton').addEventListener('click', previewWprAreaPolygon);
+        document.getElementById('manualPointDdButton').addEventListener('click', function() {
+            switchManualPointCoordinateFormat('dd');
+        });
+        document.getElementById('manualPointDmsButton').addEventListener('click', function() {
+            switchManualPointCoordinateFormat('dms');
+        });
+        document.getElementById('checkManualPointButton').addEventListener('click', previewManualPoint);
         document.getElementById('locateMeButton').addEventListener('click', showCurrentLocation);
         document.getElementById('clearLocationButton').addEventListener('click', clearCurrentLocation);
         document.getElementById('petiGeojsonFile').addEventListener('change', loadPetiGeoJsonFromFile);
