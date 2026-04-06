@@ -1748,6 +1748,7 @@
             document.body.classList.toggle('viewer-mode', !isEditor());
             const roleBadge = document.getElementById('roleBadge');
             roleBadge.textContent = isEditor() ? 'Mode Edit' : 'Mode Review';
+            renderPetiTable(getFilteredPetiPoints());
         }
 
         function showLoginScreen() {
