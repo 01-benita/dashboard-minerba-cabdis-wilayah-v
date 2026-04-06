@@ -64,5 +64,137 @@
     "latitude": 1.715992,
     "keterangan": "",
     "photoDataUrl": "data/peti_photos/peti-pandan-1.jpeg"
+  },
+  {
+    "id": "peti-tantom-pinggir-sungai",
+    "nama": "PETI Tantom Galian Pinggir Sungai",
+    "komoditas": "Mineral Logam",
+    "sumber": "Kepolisian",
+    "tanggal": 1773619200000,
+    "longitude": 99.31495556,
+    "latitude": 1.044080556,
+    "keterangan": "",
+    "photoDataUrl": ""
+  },
+  {
+    "id": "peti-tantom-lokasi-galian-1",
+    "nama": "PETI Tantom Lokasi Galian",
+    "komoditas": "Mineral Logam",
+    "sumber": "Kepolisian",
+    "tanggal": 1773619200000,
+    "longitude": 99.315825,
+    "latitude": 1.043883333,
+    "keterangan": "",
+    "photoDataUrl": ""
+  },
+  {
+    "id": "peti-tantom-lokasi-galian-2",
+    "nama": "PETI Tantom Lokasi Galian",
+    "komoditas": "Mineral Logam",
+    "sumber": "Kepolisian",
+    "tanggal": 1773619200000,
+    "longitude": 99.31508889,
+    "latitude": 1.044033333,
+    "keterangan": "",
+    "photoDataUrl": ""
+  },
+  {
+    "id": "peti-tantom-lokasi-galian-3",
+    "nama": "PETI Tantom Lokasi Galian",
+    "komoditas": "Mineral Logam",
+    "sumber": "Kepolisian",
+    "tanggal": 1773619200000,
+    "longitude": 99.31540556,
+    "latitude": 1.046841667,
+    "keterangan": "",
+    "photoDataUrl": ""
+  },
+  {
+    "id": "peti-tantom-lokasi-galian-4",
+    "nama": "PETI Tantom Lokasi Galian",
+    "komoditas": "Mineral Logam",
+    "sumber": "Kepolisian",
+    "tanggal": 1773619200000,
+    "longitude": 99.31506111,
+    "latitude": 1.046580556,
+    "keterangan": "",
+    "photoDataUrl": ""
+  },
+  {
+    "id": "peti-tantom-lokasi-galian-5",
+    "nama": "PETI Tantom Lokasi Galian",
+    "komoditas": "Mineral Logam",
+    "sumber": "Kepolisian",
+    "tanggal": 1773619200000,
+    "longitude": 99.31534167,
+    "latitude": 1.046188889,
+    "keterangan": "",
+    "photoDataUrl": ""
+  },
+  {
+    "id": "peti-tantom-lokasi-galian-6",
+    "nama": "PETI Tantom Lokasi Galian",
+    "komoditas": "Mineral Logam",
+    "sumber": "Kepolisian",
+    "tanggal": 1773619200000,
+    "longitude": 99.31536389,
+    "latitude": 1.044613889,
+    "keterangan": "",
+    "photoDataUrl": ""
+  },
+  {
+    "id": "peti-tantom-box-1",
+    "nama": "PETI Tantom Box 1",
+    "komoditas": "Mineral Logam",
+    "sumber": "Kepolisian",
+    "tanggal": 1773619200000,
+    "longitude": 99.31495556,
+    "latitude": 1.044633333,
+    "keterangan": "",
+    "photoDataUrl": ""
+  },
+  {
+    "id": "peti-tantom-box-2",
+    "nama": "PETI Tantom Box 2",
+    "komoditas": "Mineral Logam",
+    "sumber": "Kepolisian",
+    "tanggal": 1773619200000,
+    "longitude": 99.31503889,
+    "latitude": 1.044052778,
+    "keterangan": "",
+    "photoDataUrl": ""
+  },
+  {
+    "id": "peti-tantom-box-3",
+    "nama": "PETI Tantom Box 3",
+    "komoditas": "Mineral Logam",
+    "sumber": "Kepolisian",
+    "tanggal": 1773619200000,
+    "longitude": 99.31532222,
+    "latitude": 1.04405,
+    "keterangan": "",
+    "photoDataUrl": ""
+  },
+  {
+    "id": "peti-sipb-bagas-putra-batang-toru-1",
+    "nama": "PETI SIPB Bagas Putra Batang Toru 1",
+    "komoditas": "Mineral Bukan Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": 1772384400000,
+    "longitude": 98.99364444,
+    "latitude": 1.441241667,
+    "keterangan": "",
+    "photoDataUrl": ""
+  },
+  {
+    "id": "peti-sipb-bagas-putra-batang-toru-2",
+    "nama": "PETI SIPB Bagas Putra Batang Toru 2",
+    "komoditas": "Mineral Bukan Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": 1772384400000,
+    "longitude": 98.99351944,
+    "latitude": 1.441622222,
+    "keterangan": "",
+    "photoDataUrl": ""
   }
 ]
