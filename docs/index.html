@@ -39,9 +39,17 @@
             justify-content: center;
             padding: 24px;
             background:
-                radial-gradient(circle at top left, rgba(244, 127, 176, 0.24), transparent 38%),
-                radial-gradient(circle at bottom right, rgba(77, 166, 255, 0.18), transparent 34%),
-                linear-gradient(135deg, #fff5fa 0%, #f4f7ff 100%);
+                radial-gradient(circle at top left, rgba(244, 127, 176, 0.22), transparent 36%),
+                radial-gradient(circle at bottom right, rgba(77, 166, 255, 0.14), transparent 32%),
+                linear-gradient(135deg, #fff6fb 0%, #f8f6ff 100%);
+        }
+
+        .login-layout {
+            width: min(100%, 980px);
+            display: grid;
+            grid-template-columns: minmax(340px, 420px) minmax(320px, 460px);
+            gap: 20px;
+            align-items: start;
         }
 
         .login-shell.is-hidden,
@@ -50,13 +58,55 @@
         }
 
         .login-card {
-            width: min(100%, 420px);
-            background: rgba(255,255,255,0.94);
-            border: 1px solid rgba(232, 210, 224, 0.9);
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            border: 1px solid rgba(232, 210, 224, 0.92);
             border-radius: 24px;
-            padding: 28px;
-            box-shadow: 0 24px 46px rgba(154, 108, 133, 0.16);
+            padding: 26px 24px;
+            box-shadow: 0 22px 44px rgba(154, 108, 133, 0.14);
             backdrop-filter: blur(12px);
+        }
+
+        .login-card--form {
+            min-height: 100%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(255,249,252,0.96) 100%);
+        }
+
+        .login-card--qr {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            background:
+                radial-gradient(circle at top right, rgba(244, 127, 176, 0.14), transparent 24%),
+                linear-gradient(160deg, #fff9fc 0%, #fff3f8 44%, #f7fbff 100%);
+        }
+
+        .login-card--qr::before,
+        .login-card--qr::after {
+            content: "";
+            position: absolute;
+            border-radius: 999px;
+            pointer-events: none;
+        }
+
+        .login-card--qr::before {
+            width: 170px;
+            height: 170px;
+            top: -72px;
+            right: -54px;
+            background: rgba(244, 127, 176, 0.16);
+        }
+
+        .login-card--qr::after {
+            width: 130px;
+            height: 130px;
+            bottom: -50px;
+            left: -34px;
+            background: rgba(77, 166, 255, 0.10);
         }
 
         .login-brand {
@@ -73,23 +123,23 @@
             border-radius: 999px;
             background: linear-gradient(90deg, #f47fb0 0%, #ee8fc1 100%);
             color: white;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 800;
             letter-spacing: 0.08em;
         }
 
         .login-card h2 {
-            margin: 0 0 10px;
+            margin: 0 0 12px;
             font-size: 28px;
             text-align: center;
             color: #332b31;
         }
 
         .login-card p {
-            margin: 0 0 22px;
+            margin: 0 0 18px;
             text-align: center;
             color: #6f5f68;
-            line-height: 1.6;
+            line-height: 1.65;
         }
 
         .login-form {
@@ -147,6 +197,86 @@
             font-size: 13px;
             font-weight: 600;
             color: #b42318;
+            text-align: center;
+        }
+
+        .login-qr-content,
+        .login-qr-frame {
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-qr-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+        }
+
+        .login-qr-kicker {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(244, 127, 176, 0.14);
+            color: #b34a7d;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+        }
+
+        .login-qr-content h3 {
+            margin: 0;
+            font-size: 22px;
+            line-height: 1.25;
+            color: #332b31;
+            max-width: 360px;
+        }
+
+        .login-qr-content p {
+            margin: 0;
+            color: #6f5f68;
+            line-height: 1.65;
+            text-align: center;
+            font-size: 14px;
+            max-width: 360px;
+        }
+
+        .login-qr-frame {
+            padding: 12px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 246, 250, 0.94) 100%);
+            border: 1px solid rgba(239, 191, 215, 0.9);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 14px 28px rgba(154, 108, 133, 0.10);
+            max-width: 292px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .login-qr-frame img {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            border-radius: 14px;
+            border: 1px solid #f1d6e4;
+            box-shadow: 0 12px 22px rgba(112, 76, 96, 0.10);
+        }
+
+        .login-qr-note {
+            position: relative;
+            z-index: 1;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.74);
+            border: 1px dashed rgba(239, 191, 215, 0.92);
+            color: #7a6772;
+            font-size: 12px;
+            line-height: 1.65;
+            max-width: 360px;
             text-align: center;
         }
 
@@ -1173,6 +1303,15 @@
         }
 
         @media (max-width: 1100px) {
+            .login-layout {
+                grid-template-columns: 1fr;
+                max-width: 620px;
+            }
+
+            .login-card {
+                width: 100%;
+            }
+
             .sidebar {
                 width: 160px;
                 padding: 12px 10px 16px;
@@ -1218,6 +1357,28 @@
 
             body {
                 background: linear-gradient(180deg, #f9eef5 0%, #f5f1fb 100%);
+            }
+
+            .login-shell {
+                padding: 16px;
+            }
+
+            .login-layout {
+                gap: 16px;
+            }
+
+            .login-card {
+                padding: 22px 18px;
+                border-radius: 20px;
+            }
+
+            .login-qr-content h3 {
+                font-size: 24px;
+            }
+
+            .login-qr-frame {
+                padding: 12px;
+                border-radius: 18px;
             }
 
             .sidebar {
@@ -1384,26 +1545,41 @@
 <body class="auth-locked">
 
     <div class="login-shell" id="loginScreen">
-        <div class="login-card">
-            <div class="login-brand">
-                <span>MINERBA</span>
+        <div class="login-layout">
+            <div class="login-card login-card--form">
+                <div class="login-brand">
+                    <span>MINERBA</span>
+                </div>
+                <h2>Masuk Dashboard</h2>
+                <p>Silakan login terlebih dahulu untuk membuka dashboard izin pertambangan Cabang Dinas Wilayah V.</p>
+                <form class="login-form" id="loginForm">
+                    <label for="loginUsername">
+                        Username
+                        <input type="text" id="loginUsername" autocomplete="username" placeholder="Masukkan username">
+                    </label>
+                    <label for="loginPassword">
+                        Password
+                        <input type="password" id="loginPassword" autocomplete="current-password" placeholder="Masukkan password">
+                    </label>
+                    <div class="login-error" id="loginError"></div>
+                    <button type="submit" class="primary-btn">Masuk</button>
+                </form>
+                <div class="login-hint">
+                    Akun `reviewer` hanya dapat melihat data. Akun `editor` dapat menambah dan menghapus data. Saat ini login disimpan di browser agar pengguna tidak perlu masuk ulang setiap reload.
+                </div>
             </div>
-            <h2>Masuk Dashboard</h2>
-            <p>Silakan login terlebih dahulu untuk membuka dashboard izin pertambangan Cabang Dinas Wilayah V.</p>
-            <form class="login-form" id="loginForm">
-                <label for="loginUsername">
-                    Username
-                    <input type="text" id="loginUsername" autocomplete="username" placeholder="Masukkan username">
-                </label>
-                <label for="loginPassword">
-                    Password
-                    <input type="password" id="loginPassword" autocomplete="current-password" placeholder="Masukkan password">
-                </label>
-                <div class="login-error" id="loginError"></div>
-                <button type="submit" class="primary-btn">Masuk</button>
-            </form>
-            <div class="login-hint">
-                Akun `reviewer` hanya dapat melihat data. Akun `editor` dapat menambah dan menghapus data. Saat ini login disimpan di browser agar pengguna tidak perlu masuk ulang setiap reload.
+            <div class="login-card login-card--qr">
+                <div class="login-qr-content">
+                    <span class="login-qr-kicker">Layanan Publik</span>
+                    <h3>Akses layanan informasi dan SOP pelayanan.</h3>
+                    <p>Pindai QR code untuk membuka informasi layanan publik DPPESDM Cabang Dinas Wilayah V Padangsidimpuan.</p>
+                </div>
+                <div class="login-qr-frame">
+                    <img src="data/login-qr-sop.png" alt="QR layanan informasi dan SOP pelayanan">
+                </div>
+                <div class="login-qr-note">
+                    Pindai menggunakan kamera ponsel untuk membuka tautan SOP dan layanan informasi DPPESDM Cabang Dinas Wilayah V Padangsidimpuan.
+                </div>
             </div>
         </div>
     </div>
@@ -1458,7 +1634,7 @@
                 <div class="value" id="totalIzin">0</div>
             </div>
             <div class="card">
-                <div class="label">Total Luas (Ha)</div>
+                <div class="label">Total Luas Wilayah Kerja (Ha)</div>
                 <div class="value" id="totalLuas">0</div>
             </div>
             <div class="card card-link">
@@ -1664,6 +1840,7 @@
                     </div>
                     <div class="input-actions">
                         <button type="button" class="outline-btn" id="checkWiupButton">Cek Koordinat WIUP</button>
+                        <button type="button" class="outline-btn" id="clearWiupPreviewButton">Clear Preview WIUP</button>
                         <span class="form-status" id="wiupFormStatus">Belum ada polygon WIUP yang dipreview.</span>
                     </div>
                 </div>
@@ -1681,6 +1858,7 @@
                     </div>
                     <div class="input-actions">
                         <button type="button" class="outline-btn" id="checkWprAreaButton">Cek Area WPR</button>
+                        <button type="button" class="outline-btn" id="clearWprAreaPreviewButton">Clear Preview WPR</button>
                         <span class="form-status" id="wprAreaFormStatus">Belum ada polygon area WPR yang dipreview.</span>
                     </div>
                 </div>
@@ -2012,6 +2190,16 @@
             const date = new Date(timestamp);
             if (isNaN(date.getTime())) return '-';
             return date.toLocaleDateString('id-ID');
+        }
+
+        function formatAngkaIndonesia(value, fractionDigits = 2) {
+            const number = Number(value);
+            if (!Number.isFinite(number)) return '-';
+
+            return new Intl.NumberFormat('id-ID', {
+                minimumFractionDigits: fractionDigits,
+                maximumFractionDigits: fractionDigits
+            }).format(number);
         }
 
         function getIzinColor(izin) {
@@ -2490,7 +2678,7 @@
             }
 
             marker.setStyle({
-                radius: 12,
+                radius: 8,
                 color: '#ff7a18',
                 weight: 3,
                 fillColor: '#ffd166',
@@ -2499,7 +2687,7 @@
 
             const timeoutId = window.setTimeout(() => {
                 marker.setStyle({
-                    radius: 8,
+                    radius: 5,
                     color: '#8f1d14',
                     weight: 2,
                     fillColor: '#d92d20',
@@ -2511,7 +2699,7 @@
             activeHighlightReset = function() {
                 window.clearTimeout(timeoutId);
                 marker.setStyle({
-                    radius: 8,
+                    radius: 5,
                     color: '#8f1d14',
                     weight: 2,
                     fillColor: '#d92d20',
@@ -2907,6 +3095,11 @@
             });
         }
 
+        function shouldHidePetiPhoto(point) {
+            const nama = String(point?.nama || '').trim().toLowerCase();
+            return nama === 'peti tantom galian pinggir sungai';
+        }
+
         function renderPetiTable(points = petiPoints) {
             const petiTableBody = document.getElementById('petiTableBody');
             const canEdit = isEditor();
@@ -2929,7 +3122,7 @@
                     <td>${point.tanggal ? safeHtml(formatTanggal(point.tanggal)) : '-'}</td>
                     <td>${safeHtml(formatCoordinate(point.longitude))}</td>
                     <td>${safeHtml(formatCoordinate(point.latitude))}</td>
-                    <td>${point.photoDataUrl ? '<a href="' + safeHtml(point.photoDataUrl) + '" target="_blank" rel="noopener noreferrer" class="peti-photo-link">Lihat Foto</a>' : '-'}</td>
+                    <td>${point.photoDataUrl && !shouldHidePetiPhoto(point) ? '<a href="' + safeHtml(point.photoDataUrl) + '" target="_blank" rel="noopener noreferrer" class="peti-photo-link">Lihat Foto</a>' : '-'}</td>
                     <td>${safeHtml(point.keterangan || '-')}</td>
                     <td>${canEdit ? '<button type="button" class="table-action-btn" data-peti-delete-id="' + safeHtml(point.id) + '">Hapus</button>' : '<span>-</span>'}</td>
                 </tr>
@@ -2937,7 +3130,7 @@
         }
 
         function createPetiPopupContent(point) {
-            const photoContent = point.photoDataUrl
+            const photoContent = point.photoDataUrl && !shouldHidePetiPhoto(point)
                 ? `<img src="${safeHtml(point.photoDataUrl)}" alt="Foto PETI ${safeHtml(point.nama || 'Lokasi')}" class="popup-photo">`
                 : '';
 
@@ -2966,7 +3159,7 @@
 
             points.forEach(point => {
                 const marker = L.circleMarker([point.latitude, point.longitude], {
-                    radius: 8,
+                    radius: 5,
                     color: '#8f1d14',
                     weight: 2,
                     fillColor: '#d92d20',
@@ -3401,6 +3594,26 @@
             }
         }
 
+        function clearWprAreaPreview() {
+            let hadPreview = false;
+
+            if (wprAreaPreviewLayer) {
+                map.removeLayer(wprAreaPreviewLayer);
+                wprAreaPreviewLayer = null;
+                hadPreview = true;
+            }
+
+            wprAreaPreviewCoordinates = null;
+            document.getElementById('wprKoordinatFile').value = '';
+
+            setWprAreaFormStatus(
+                hadPreview
+                    ? 'Preview polygon area WPR berhasil dibersihkan dari peta.'
+                    : 'Belum ada preview polygon area WPR yang ditampilkan.',
+                hadPreview ? 'success' : 'error'
+            );
+        }
+
         function checkPointWithinWpr(longitude, latitude) {
             if (!allData || !Array.isArray(allData.features)) {
                 return {
@@ -3496,6 +3709,26 @@
             } catch (error) {
                 setInputFormStatus(error.message, 'error');
             }
+        }
+
+        function clearWiupPreview() {
+            let hadPreview = false;
+
+            if (wiupPreviewLayer) {
+                map.removeLayer(wiupPreviewLayer);
+                wiupPreviewLayer = null;
+                hadPreview = true;
+            }
+
+            wiupPreviewCoordinates = null;
+            document.getElementById('wiupKoordinatFile').value = '';
+
+            setWiupFormStatus(
+                hadPreview
+                    ? 'Preview polygon WIUP berhasil dibersihkan dari peta.'
+                    : 'Belum ada preview polygon WIUP yang ditampilkan.',
+                hadPreview ? 'success' : 'error'
+            );
         }
 
         function applyFilters() {
@@ -3623,16 +3856,56 @@
             };
         }
 
+        function sortFeaturesByTanggalDesc(features) {
+            return [...features].sort((featureA, featureB) => {
+                const tanggalA = Number(featureA?.properties?.Tanggal || 0);
+                const tanggalB = Number(featureB?.properties?.Tanggal || 0);
+                const hasTanggalA = Number.isFinite(tanggalA) && tanggalA > 0;
+                const hasTanggalB = Number.isFinite(tanggalB) && tanggalB > 0;
+
+                if (hasTanggalA && hasTanggalB) {
+                    return tanggalB - tanggalA;
+                }
+
+                if (hasTanggalA) {
+                    return -1;
+                }
+
+                if (hasTanggalB) {
+                    return 1;
+                }
+
+                return 0;
+            });
+        }
+
+        const WILAYAH_KERJA_AREA_KM2 = Object.freeze({
+            sibolga: 10.77,
+            tapanuliSelatan: 4355.35,
+            tapanuliTengah: 2194.98,
+            mandailingNatal: 6620.70,
+            padangsidimpuan: 159.28
+        });
+
+        function getWilayahKerjaTotalAreaHa() {
+            const totalKm2 = Object.values(WILAYAH_KERJA_AREA_KM2).reduce((sum, value) => sum + value, 0);
+            return totalKm2 * 100;
+        }
+
         function updateTable(data) {
             const polygonTableBody = document.getElementById('polygonTableBody');
             const sipbTableBody = document.getElementById('sipbTableBody');
             const wprTableHead = document.getElementById('wprTableHead');
             const wprTableBody = document.getElementById('wprTableBody');
-            const generalIzinFeatures = data.features.filter(feature => {
-                const izin = (feature.properties.Izin || '').trim();
-                return izin !== 'WPR' && izin !== 'SIPB';
-            });
-            const sipbFeatures = data.features.filter(feature => (feature.properties.Izin || '').trim() === 'SIPB');
+            const generalIzinFeatures = sortFeaturesByTanggalDesc(
+                data.features.filter(feature => {
+                    const izin = (feature.properties.Izin || '').trim();
+                    return izin !== 'WPR' && izin !== 'SIPB';
+                })
+            );
+            const sipbFeatures = sortFeaturesByTanggalDesc(
+                data.features.filter(feature => (feature.properties.Izin || '').trim() === 'SIPB')
+            );
             const wprFeatures = data.features.filter(feature => (feature.properties.Izin || '').trim() === 'WPR');
             currentGeneralIzinFeatures = generalIzinFeatures;
             currentSipbFeatures = sipbFeatures;
@@ -3826,13 +4099,15 @@
         }
 
         function updateCards(data) {
-            const totalIzin = data.features.length;
-            const totalLuas = data.features.reduce((sum, feature) => {
-                return sum + Number(feature.properties.Area || 0);
-            }, 0);
+            const countedIzin = data.features.filter(feature => {
+                const izin = (feature?.properties?.Izin || '').trim();
+                return izin === 'SIPB' || izin === 'IUP OP' || izin === 'IUP Eksplorasi';
+            });
+            const totalIzin = countedIzin.length;
+            const totalLuas = getWilayahKerjaTotalAreaHa();
 
             document.getElementById('totalIzin').textContent = totalIzin;
-            document.getElementById('totalLuas').textContent = totalLuas.toFixed(2);
+            document.getElementById('totalLuas').textContent = formatAngkaIndonesia(totalLuas);
         }
 
         function countByField(features, fieldName) {
@@ -4170,7 +4445,9 @@
         document.getElementById('wprKoordinatFile').addEventListener('change', loadWprAreaCoordinatesFromExcel);
         document.getElementById('addGeojsonButton').addEventListener('click', addPolygonFromInput);
         document.getElementById('checkWiupButton').addEventListener('click', previewWiupPolygon);
+        document.getElementById('clearWiupPreviewButton').addEventListener('click', clearWiupPreview);
         document.getElementById('checkWprAreaButton').addEventListener('click', previewWprAreaPolygon);
+        document.getElementById('clearWprAreaPreviewButton').addEventListener('click', clearWprAreaPreview);
         document.getElementById('manualPointDdButton').addEventListener('click', function() {
             switchManualPointCoordinateFormat('dd');
         });
