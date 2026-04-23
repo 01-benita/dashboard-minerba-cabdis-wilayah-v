@@ -35,7 +35,7 @@ Dashboard akan mengirim JSON seperti ini:
 Buka `script.google.com`, buat project baru, lalu isi `Code.gs` dengan script berikut:
 
 ```javascript
-const CALENDAR_ID = 'primary';
+const CALENDAR_ID = 'benitacabdisv@gmail.com';
 
 function doPost(e) {
   const payload = JSON.parse(e.postData.contents || '{}');
@@ -103,7 +103,7 @@ function jsonResponse(payload) {
 1. Klik `Deploy`.
 2. Pilih `New deployment`.
 3. Tipe: `Web app`.
-4. `Execute as`: akun Google kamu.
+4. `Execute as`: akun Google `benitacabdisv@gmail.com`.
 5. `Who has access`: `Anyone` atau `Anyone with the link`.
 6. Copy URL Web App.
 
@@ -119,3 +119,4 @@ function jsonResponse(payload) {
 - Event dibuat sebagai all-day event.
 - Dashboard hanya mengirim event yang tanggal pengingatnya belum lewat.
 - Jika ingin update event lama, marker `DASHBOARD-MINERBA:<event_key>` dipakai untuk mengenali event yang sudah pernah dibuat.
+- Webhook harus dideploy dari akun Google yang memang punya akses ke kalender `benitacabdisv@gmail.com`.
