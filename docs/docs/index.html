@@ -25,7 +25,8 @@
 
         body.auth-locked {
             min-height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         body.viewer-mode .editor-only {
@@ -34,10 +35,11 @@
 
         .login-shell {
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
-            padding: 24px;
+            padding: 24px 24px 40px;
             background:
                 radial-gradient(circle at top left, rgba(244, 127, 176, 0.22), transparent 36%),
                 radial-gradient(circle at bottom right, rgba(77, 166, 255, 0.14), transparent 32%),
@@ -46,6 +48,7 @@
 
         .login-layout {
             width: min(100%, 980px);
+            margin: 0 auto;
             display: grid;
             grid-template-columns: minmax(340px, 420px) minmax(320px, 460px);
             gap: 20px;
@@ -996,38 +999,88 @@
             color: #6f5f68;
         }
 
+        .pdf-panel {
+            min-width: 0;
+            border: 1px solid rgba(232, 210, 224, 0.9);
+            box-shadow: 0 12px 24px rgba(154, 108, 133, 0.08);
+        }
+
+        .pdf-panel h3 {
+            margin-bottom: 10px;
+        }
+
+        .pdf-panel .input-help {
+            margin-top: 0;
+            margin-bottom: 14px;
+            background: linear-gradient(180deg, #fffafc 0%, #fff6fa 100%);
+            border-color: #efc4d8;
+            color: #816575;
+        }
+
+        .pdf-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 12px;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 720px;
+            border: 1px solid #edd7e4;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #fffdfd 0%, #fff7fb 100%);
+            overflow: hidden;
+        }
+
+        .pdf-viewer iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: block;
+        }
+
         .table-wrap {
             overflow-x: auto;
-            border: 1px solid #f0d7e5;
-            border-radius: 14px;
+            border: 1px solid #eed9e5;
+            border-radius: 16px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(255,250,253,0.96) 100%);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.95);
         }
 
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 900px;
-            font-size: 13px;
+            min-width: 1520px;
+            font-size: 12.5px;
+            color: #3b3340;
+            table-layout: fixed;
         }
 
         .data-table th,
         .data-table td {
             padding: 10px 12px;
             text-align: left;
-            border-bottom: 1px solid #f3e7ee;
+            border-bottom: 1px solid #f2e6ec;
             vertical-align: top;
+            line-height: 1.45;
         }
 
         .data-table th {
-            background: #fff5fa;
-            color: #555;
-            font-weight: 600;
+            background: linear-gradient(180deg, #fff8fc 0%, #fff1f7 100%);
+            color: #665565;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
             position: sticky;
             top: 0;
             z-index: 1;
+            white-space: nowrap;
+            box-shadow: inset 0 -1px 0 #efd8e6;
         }
 
         .data-table tbody tr:nth-child(even) {
-            background: #fffafd;
+            background: rgba(255, 251, 253, 0.92);
         }
 
         .data-table tbody tr:hover {
@@ -1073,6 +1126,95 @@
             text-align: center;
             color: #777;
             font-size: 14px;
+        }
+
+        .cell-text {
+            display: inline-block;
+            max-width: 100%;
+            color: #3b3340;
+            line-height: 1.45;
+            word-break: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .cell-text--compact {
+            max-width: 100%;
+        }
+
+        .cell-text--wide {
+            max-width: 100%;
+        }
+
+        .cell-text--muted {
+            color: #6f6170;
+        }
+
+        .cell-text--strong {
+            font-weight: 700;
+            color: #2f2934;
+        }
+
+        .data-table col.col-name {
+            width: 210px;
+        }
+
+        .data-table col.col-number {
+            width: 56px;
+        }
+
+        .data-table col.col-commodity {
+            width: 150px;
+        }
+
+        .data-table col.col-type {
+            width: 100px;
+        }
+
+        .data-table col.col-status {
+            width: 110px;
+        }
+
+        .data-table col.col-kabupaten,
+        .data-table col.col-kecamatan,
+        .data-table col.col-desa {
+            width: 110px;
+        }
+
+        .data-table col.col-area,
+        .data-table col.col-kbli,
+        .data-table col.col-pajak,
+        .data-table col.col-date,
+        .data-table col.col-duration {
+            width: 88px;
+        }
+
+        .data-table col.col-nib {
+            width: 118px;
+        }
+
+        .data-table col.col-sk {
+            width: 180px;
+        }
+
+        .data-table col.col-rkab,
+        .data-table col.col-fs {
+            width: 150px;
+        }
+
+        .data-table col.col-dasar-pajak {
+            width: 170px;
+        }
+
+        .data-table col.col-direktur {
+            width: 130px;
+        }
+
+        .data-table col.col-marker {
+            width: 120px;
+        }
+
+        .data-table col.col-calendar {
+            width: 150px;
         }
 
         .right-panel {
@@ -1290,6 +1432,44 @@
 
         .table-action-btn:hover {
             background: #b42318;
+        }
+
+        .table-action-btn--calendar {
+            background: linear-gradient(135deg, #0f9d58, #168f63);
+        }
+
+        .table-action-btn--calendar:hover {
+            background: linear-gradient(135deg, #0b8043, #127055);
+        }
+
+        .table-action-btn--calendar[disabled] {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .table-action-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .calendar-sync-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #eef8f1;
+            color: #177245;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+
+        .calendar-sync-pill.is-pending {
+            background: #fff4e5;
+            color: #b54708;
         }
 
         .peti-photo-link {
@@ -1599,10 +1779,12 @@
         <div class="menu">
             <a href="#main">Dashboard</a>
             <a href="#map-panel">Peta</a>
-            <a href="#table-panel">Atribut IUP</a>
+            <a href="#iup-op-table-panel">Atribut IUP OP</a>
+            <a href="#iup-eksplorasi-table-panel">Atribut IUP Eks</a>
             <a href="#sipb-table-panel">Atribut SIPB</a>
             <a href="#wpr-table-panel">Atribut WPR</a>
             <a href="#peti-table-panel">Atribut PETI</a>
+            <a href="#petunjuk-teknis-panel">Petunjuk Teknis</a>
             <a href="#peti-input-panel" class="editor-only">Input PETI</a>
             <a href="#input-panel" class="editor-only">Input Polygon</a>
             <a href="#wiup-upload-panel">Upload WIUP</a>
@@ -1630,7 +1812,7 @@
 
         <div class="cards">
             <div class="card">
-                <div class="label">Total Izin</div>
+                <div class="label">Total Izin Aktif</div>
                 <div class="value" id="totalIzin">0</div>
             </div>
             <div class="card">
@@ -1679,7 +1861,7 @@
                             <div class="legend-inline">
                                 <div class="legend-item"><span class="legend-color" style="background:#ff4fa3;"></span> SIPB</div>
                                 <div class="legend-item"><span class="legend-color" style="background:#4da6ff;"></span> IUP OP</div>
-                                <div class="legend-item"><span class="legend-color" style="background:#00c27a;"></span> IUP Eksplorasi</div>
+                                <div class="legend-item"><span class="legend-color" style="background:#00c27a;"></span> IUP Eks</div>
                                 <div class="legend-item"><span class="legend-color" style="background:#9b59b6;"></span> WPR</div>
                                 <div class="legend-item"><span class="legend-color" style="background:#d92d20;"></span> PETI</div>
                             </div>
@@ -1688,12 +1870,89 @@
                     <div id="map"></div>
                 </div>
 
-                <div class="panel table-panel" id="table-panel">
-                    <h3>Atribut IUP</h3>
+                <div class="panel table-panel" id="iup-op-table-panel">
+                    <h3>Atribut IUP OP</h3>
                     <div class="table-wrap">
-                        <table class="data-table">
+                        <table class="data-table data-table--iup">
+                            <colgroup>
+                                <col class="col-number">
+                                <col class="col-name">
+                                <col class="col-commodity">
+                                <col class="col-type">
+                                <col class="col-status">
+                                <col class="col-kabupaten">
+                                <col class="col-kecamatan">
+                                <col class="col-desa">
+                                <col class="col-area">
+                                <col class="col-sk">
+                                <col class="col-pajak">
+                                <col class="col-dasar-pajak">
+                                <col class="col-direktur">
+                                <col class="col-date">
+                                <col class="col-duration">
+                                <col class="col-marker">
+                                <col class="col-calendar">
+                            </colgroup>
                             <thead>
                                 <tr>
+                                    <th>No.</th>
+                                    <th>Nama</th>
+                                    <th>Komoditas</th>
+                                    <th>Jenis Izin</th>
+                                    <th>Status</th>
+                                    <th>Kabupaten</th>
+                                    <th>Kecamatan</th>
+                                    <th>Desa</th>
+                                    <th>Luas Area (Ha)</th>
+                                    <th>KBLI</th>
+                                    <th>NIB</th>
+                                    <th>Nomor SK</th>
+                                    <th>RKAB</th>
+                                    <th>Persetujuan FS</th>
+                                    <th>Pajak MBLB</th>
+                                    <th>Dasar Pajak</th>
+                                    <th>Direktur</th>
+                                    <th>Tanggal SK</th>
+                                    <th>Masa Berlaku</th>
+                                    <th>Penanda</th>
+                                    <th>Google Calendar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="iupOpTableBody">
+                                <tr>
+                                    <td colspan="21" class="empty-table">Memuat data IUP OP...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel table-panel" id="iup-eksplorasi-table-panel">
+                    <h3>Atribut IUP Eks</h3>
+                    <div class="table-wrap">
+                        <table class="data-table data-table--iup">
+                            <colgroup>
+                                <col class="col-number">
+                                <col class="col-name">
+                                <col class="col-commodity">
+                                <col class="col-type">
+                                <col class="col-status">
+                                <col class="col-kabupaten">
+                                <col class="col-kecamatan">
+                                <col class="col-desa">
+                                <col class="col-area">
+                                <col class="col-sk">
+                                <col class="col-pajak">
+                                <col class="col-dasar-pajak">
+                                <col class="col-direktur">
+                                <col class="col-date">
+                                <col class="col-duration">
+                                <col class="col-marker">
+                                <col class="col-calendar">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
                                     <th>Nama</th>
                                     <th>Komoditas</th>
                                     <th>Jenis Izin</th>
@@ -1703,14 +1962,18 @@
                                     <th>Desa</th>
                                     <th>Luas Area (Ha)</th>
                                     <th>Nomor SK</th>
+                                    <th>Pajak MBLB</th>
+                                    <th>Dasar Pajak</th>
+                                    <th>Direktur</th>
                                     <th>Tanggal SK</th>
                                     <th>Masa Berlaku</th>
                                     <th>Penanda</th>
+                                    <th>Google Calendar</th>
                                 </tr>
                             </thead>
-                            <tbody id="polygonTableBody">
+                            <tbody id="iupEksplorasiTableBody">
                                 <tr>
-                                    <td colspan="12" class="empty-table">Memuat data izin...</td>
+                                    <td colspan="17" class="empty-table">Memuat data IUP Eks...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1720,9 +1983,28 @@
                 <div class="panel table-panel" id="sipb-table-panel">
                     <h3>Atribut SIPB</h3>
                     <div class="table-wrap">
-                        <table class="data-table">
+                        <table class="data-table data-table--sipb">
+                            <colgroup>
+                                <col class="col-number">
+                                <col class="col-name">
+                                <col class="col-commodity">
+                                <col class="col-status">
+                                <col class="col-kabupaten">
+                                <col class="col-kecamatan">
+                                <col class="col-desa">
+                                <col class="col-area">
+                                <col class="col-kbli">
+                                <col class="col-nib">
+                                <col class="col-sk">
+                                <col class="col-direktur">
+                                <col class="col-date">
+                                <col class="col-duration">
+                                <col class="col-marker">
+                                <col class="col-calendar">
+                            </colgroup>
                             <thead>
                                 <tr>
+                                    <th>No.</th>
                                     <th>Nama</th>
                                     <th>Komoditas</th>
                                     <th>Status</th>
@@ -1730,16 +2012,20 @@
                                     <th>Kecamatan</th>
                                     <th>Desa</th>
                                     <th>Luas Area (Ha)</th>
+                                    <th>KBLI</th>
+                                    <th>NIB</th>
                                     <th>Nomor SK</th>
+                                    <th>Direktur</th>
                                     <th>Tanggal SK</th>
                                     <th>Masa Berlaku</th>
                                     <th>Dokumen Teknis</th>
                                     <th>Penanda</th>
+                                    <th>Google Calendar</th>
                                 </tr>
                             </thead>
                             <tbody id="sipbTableBody">
                                 <tr>
-                                    <td colspan="12" class="empty-table">Memuat data SIPB...</td>
+                                    <td colspan="17" class="empty-table">Memuat data SIPB...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1770,6 +2056,7 @@
                         <table class="data-table">
                             <thead>
                                 <tr>
+                                    <th>No.</th>
                                     <th>Nama/Lokasi</th>
                                     <th>Komoditas</th>
                                     <th>Sumber Data</th>
@@ -1783,7 +2070,7 @@
                             </thead>
                             <tbody id="petiTableBody">
                                 <tr>
-                                    <td colspan="9" class="empty-table">Belum ada titik PETI yang diinput.</td>
+                                    <td colspan="10" class="empty-table">Belum ada titik PETI yang diinput.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1827,6 +2114,19 @@
             </div>
 
             <div class="right-panel">
+                <div class="panel pdf-panel" id="petunjuk-teknis-panel">
+                    <h3>Petunjuk Teknis</h3>
+                    <div class="input-help">
+                        Klik menu ini untuk melihat file PDF petunjuk teknis langsung di dalam dashboard. Kamu juga bisa membuka file di tab baru jika ingin tampilan penuh.
+                    </div>
+                    <div class="pdf-toolbar">
+                        <a class="link-btn" href="data/petunjuk-teknis.pdf" target="_blank" rel="noopener noreferrer">Buka di Tab Baru</a>
+                    </div>
+                    <div class="pdf-viewer">
+                        <iframe src="data/petunjuk-teknis.pdf#view=FitH" title="Petunjuk Teknis PDF"></iframe>
+                    </div>
+                </div>
+
                 <div class="panel preview-panel" id="wiup-upload-panel">
                     <h3>Upload Koordinat WIUP</h3>
                     <div class="input-grid">
@@ -1920,6 +2220,24 @@
                     </div>
                 </div>
 
+                <div class="panel preview-panel" id="calendar-sync-panel">
+                    <h3>Google Calendar</h3>
+                    <div class="input-grid">
+                        <div class="input-group input-group--full">
+                            <label for="googleCalendarWebhookUrl">Webhook Google Apps Script</label>
+                            <input type="url" id="googleCalendarWebhookUrl" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
+                        </div>
+                    </div>
+                    <div class="input-help">
+                        Dashboard akan mengirim 3 event all-day untuk setiap izin yang masih valid: pengingat 6 bulan sebelum, 3 bulan sebelum, dan tepat saat izin berakhir.
+                    </div>
+                    <div class="input-actions">
+                        <button type="button" class="outline-btn" id="saveGoogleCalendarConfigButton">Simpan Webhook</button>
+                        <button type="button" class="outline-btn" id="syncAllGoogleCalendarButton">Sync Semua Izin Valid</button>
+                        <span class="form-status" id="googleCalendarStatus">Masukkan URL Web App Google Apps Script untuk mulai sinkronisasi.</span>
+                    </div>
+                </div>
+
                 <div class="panel panel-wide" id="chart-panel">
                     <h3>Jenis Izin</h3>
                     <div class="chart-wrap chart-wrap--medium">
@@ -1966,8 +2284,13 @@
     <script>
         const LOGIN_STORAGE_KEY = 'dashboardMinerbaSession';
         const PETI_STATIC_DATA_URL = 'data/peti_points.json';
+        const EXPIRED_IUP_DATA_URL = window.location.pathname.includes('/docs/')
+            ? 'data/IUP_Berakhir_FeaturesToJSON.geojson'
+            : 'docs/data/IUP_Berakhir_FeaturesToJSON.geojson';
         const PETI_LOCAL_ADDED_KEY = 'dashboardMinerbaPetiAdded';
         const PETI_LOCAL_DELETED_KEY = 'dashboardMinerbaPetiDeleted';
+        const GOOGLE_CALENDAR_WEBHOOK_KEY = 'dashboardMinerbaGoogleCalendarWebhook';
+        const GOOGLE_CALENDAR_SYNC_LOG_KEY = 'dashboardMinerbaGoogleCalendarSyncLog';
         const LOGIN_CREDENTIALS = [
             {
                 username: 'reviewer',
@@ -2013,10 +2336,12 @@
         let petiSyncInFlight = false;
         let petiDataSignature = '[]';
         let searchSuggestionIndex = -1;
-        let currentGeneralIzinFeatures = [];
+        let currentIupOpFeatures = [];
+        let currentIupEksplorasiFeatures = [];
         let currentSipbFeatures = [];
         let currentWprFeatures = [];
         let currentFilteredPetiPoints = [];
+        let calendarSyncLog = {};
         let baseMaps = {
             'OpenStreetMap': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap'
@@ -2202,11 +2527,45 @@
             }).format(number);
         }
 
+        function parseLocalizedNumber(value) {
+            if (typeof value === 'number') {
+                return Number.isFinite(value) ? value : 0;
+            }
+
+            const raw = String(value || '').trim();
+            if (!raw) return 0;
+
+            const hasDot = raw.includes('.');
+            const hasComma = raw.includes(',');
+            let normalized = raw;
+
+            if (hasDot && hasComma) {
+                // Example: 4.192,84 -> 4192.84
+                normalized = raw.replace(/\./g, '').replace(/,/g, '.');
+            } else if (hasComma) {
+                // Example: 4,72 -> 4.72
+                normalized = raw.replace(/,/g, '.');
+            } else if (hasDot) {
+                const parts = raw.split('.');
+                if (parts.length > 2) {
+                    // Example: 4.192.840 -> 4192840
+                    normalized = raw.replace(/\./g, '');
+                } else if (parts.length === 2 && parts[1].length === 3) {
+                    // Example: 416.550 -> 416550
+                    normalized = raw.replace(/\./g, '');
+                }
+            }
+
+            const number = Number(normalized);
+            return Number.isFinite(number) ? number : 0;
+        }
+
         function getIzinColor(izin) {
             const warnaIzin = {
                 'SIPB': '#ff4fa3',
                 'IUP OP': '#4da6ff',
                 'IUP Eksplorasi': '#00c27a',
+                'IUP Eks': '#00c27a',
                 'WPR': '#9b59b6'
             };
 
@@ -2459,6 +2818,15 @@
 
         function setPetiFormStatus(message, type) {
             const statusEl = document.getElementById('petiFormStatus');
+            statusEl.textContent = message;
+            statusEl.className = 'form-status';
+
+            if (type === 'error') statusEl.classList.add('is-error');
+            if (type === 'success') statusEl.classList.add('is-success');
+        }
+
+        function setGoogleCalendarStatus(message, type) {
+            const statusEl = document.getElementById('googleCalendarStatus');
             statusEl.textContent = message;
             statusEl.className = 'form-status';
 
@@ -2739,6 +3107,19 @@
         }
 
         function writePetiLocalState(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        function readStoredObject(key, fallback = {}) {
+            try {
+                const stored = JSON.parse(localStorage.getItem(key) || 'null');
+                return stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : fallback;
+            } catch (error) {
+                return fallback;
+            }
+        }
+
+        function writeStoredObject(key, value) {
             localStorage.setItem(key, JSON.stringify(value));
         }
 
@@ -3108,14 +3489,15 @@
             if (!points.length) {
                 petiTableBody.innerHTML = `
                     <tr>
-                        <td colspan="9" class="empty-table">Belum ada titik PETI yang diinput.</td>
+                        <td colspan="10" class="empty-table">Belum ada titik PETI yang diinput.</td>
                     </tr>
                 `;
                 return;
             }
 
-            petiTableBody.innerHTML = points.map(point => `
+            petiTableBody.innerHTML = points.map((point, index) => `
                 <tr>
+                    <td>${index + 1}</td>
                     <td><button type="button" class="table-focus-btn" data-peti-focus-id="${safeHtml(point.id || '')}">${safeHtml(point.nama || '-')}</button></td>
                     <td>${safeHtml(point.komoditas || '-')}</td>
                     <td>${safeHtml(point.sumber || '-')}</td>
@@ -3780,7 +4162,45 @@
                 return hasValue(p.Tanggal) ? formatTanggal(p.Tanggal) : '-';
             }
 
+             if (field === 'Desa') {
+                return formatDesaDisplayValue(p.Desa);
+            }
+
             return hasValue(p[field]) ? p[field] : '-';
+        }
+
+        function formatDesaDisplayValue(value) {
+            const raw = String(value || '').trim();
+            if (!raw) return '-';
+
+            return raw
+                .replace(/^desa\.?\s+/i, '')
+                .replace(/^kelurahan\.?\s+/i, '')
+                .replace(/^kel\.?\s+/i, '')
+                .trim() || '-';
+        }
+
+        function renderTableTextCell(value, options = {}) {
+            const text = hasValue(value) ? String(value).trim() : '-';
+            const classNames = ['cell-text'];
+
+            if (options.compact) classNames.push('cell-text--compact');
+            if (options.wide) classNames.push('cell-text--wide');
+            if (options.muted) classNames.push('cell-text--muted');
+            if (options.strong) classNames.push('cell-text--strong');
+
+            return `<span class="${classNames.join(' ')}" title="${safeHtml(text)}">${safeHtml(text)}</span>`;
+        }
+
+        function getRkabDisplayValue(properties) {
+            const nomorPersetujuan = hasValue(properties?.Nomor_Persetujuan_RKAB)
+                ? String(properties.Nomor_Persetujuan_RKAB).trim()
+                : '';
+            const rkab = hasValue(properties?.RKAB)
+                ? String(properties.RKAB).trim()
+                : '';
+
+            return nomorPersetujuan || rkab || '-';
         }
 
         function parseMasaBerlaku(masa) {
@@ -3856,6 +4276,284 @@
             };
         }
 
+        function subtractDuration(date, duration) {
+            const result = new Date(date.getTime());
+            result.setFullYear(result.getFullYear() - (duration.years || 0));
+            result.setMonth(result.getMonth() - (duration.months || 0));
+            return result;
+        }
+
+        function getTodayStart() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return today;
+        }
+
+        function toIsoDateString(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDateTimeLabel(timestamp) {
+            if (!timestamp) return '-';
+            const date = new Date(timestamp);
+            if (isNaN(date.getTime())) return '-';
+            return date.toLocaleString('id-ID');
+        }
+
+        function getGoogleCalendarWebhookUrl() {
+            return String(localStorage.getItem(GOOGLE_CALENDAR_WEBHOOK_KEY) || '').trim();
+        }
+
+        function saveGoogleCalendarWebhookUrl() {
+            const input = document.getElementById('googleCalendarWebhookUrl');
+            const value = String(input.value || '').trim();
+
+            if (!value) {
+                localStorage.removeItem(GOOGLE_CALENDAR_WEBHOOK_KEY);
+                setGoogleCalendarStatus('Webhook Google Calendar dikosongkan. Sinkronisasi dinonaktifkan sampai URL baru disimpan.', 'error');
+                applyFilters();
+                return;
+            }
+
+            if (!/^https:\/\/script\.google\.com\/macros\/s\//i.test(value)) {
+                setGoogleCalendarStatus('URL webhook harus berupa Web App Google Apps Script yang diawali https://script.google.com/macros/s/.', 'error');
+                return;
+            }
+
+            localStorage.setItem(GOOGLE_CALENDAR_WEBHOOK_KEY, value);
+            setGoogleCalendarStatus('Webhook Google Calendar berhasil disimpan. Tombol sync di tabel sudah siap dipakai.', 'success');
+            applyFilters();
+        }
+
+        function initializeGoogleCalendarSettings() {
+            calendarSyncLog = readStoredObject(GOOGLE_CALENDAR_SYNC_LOG_KEY, {});
+            const savedWebhook = getGoogleCalendarWebhookUrl();
+            document.getElementById('googleCalendarWebhookUrl').value = savedWebhook;
+
+            if (savedWebhook) {
+                setGoogleCalendarStatus('Webhook Google Calendar sudah tersimpan. Kamu bisa sync satu izin atau semua izin valid.', 'success');
+            }
+        }
+
+        function getIzinReminderSchedule(feature) {
+            const properties = feature?.properties || {};
+            const tanggal = properties.Tanggal;
+            const masa = properties.Masa;
+            const featureKey = getGeoFeatureKey(feature);
+
+            if (!hasValue(tanggal) || !hasValue(masa)) return null;
+
+            const startDate = new Date(tanggal);
+            const duration = parseMasaBerlaku(masa);
+
+            if (isNaN(startDate.getTime()) || !duration || (!duration.years && !duration.months)) {
+                return null;
+            }
+
+            const expiryDate = addDuration(startDate, duration);
+            if (isNaN(expiryDate.getTime())) return null;
+
+            const today = getTodayStart();
+            const reminderSixMonths = subtractDuration(expiryDate, { months: 6 });
+            const reminderThreeMonths = subtractDuration(expiryDate, { months: 3 });
+            const permitKeyBase = String(properties.Nomor_SK || properties.Nama || featureKey).trim() || featureKey;
+            const permitKey = permitKeyBase.replace(/\s+/g, '-').replace(/[^A-Za-z0-9._-]/g, '');
+
+            const events = [
+                {
+                    eventKey: `${featureKey}::reminder-6-months`,
+                    title: `Pengingat 6 Bulan Sebelum Izin Berakhir - ${properties.Nama || '-'}`,
+                    date: reminderSixMonths,
+                    offsetLabel: '6-bulan'
+                },
+                {
+                    eventKey: `${featureKey}::reminder-3-months`,
+                    title: `Pengingat 3 Bulan Sebelum Izin Berakhir - ${properties.Nama || '-'}`,
+                    date: reminderThreeMonths,
+                    offsetLabel: '3-bulan'
+                },
+                {
+                    eventKey: `${featureKey}::expiry-date`,
+                    title: `Izin Berakhir Hari Ini - ${properties.Nama || '-'}`,
+                    date: expiryDate,
+                    offsetLabel: 'hari-berakhir'
+                }
+            ]
+                .filter(item => item.date >= today)
+                .map(item => ({
+                    event_key: item.eventKey,
+                    title: item.title,
+                    start_date: toIsoDateString(item.date),
+                    end_date: toIsoDateString(item.date),
+                    description: [
+                        `Nama Izin: ${properties.Nama || '-'}`,
+                        `Jenis Izin: ${properties.Izin || '-'}`,
+                        `Nomor SK: ${properties.Nomor_SK || '-'}`,
+                        `Kabupaten: ${properties.Kabupaten || '-'}`,
+                        `Kecamatan: ${properties.Kecamatan || '-'}`,
+                        `Desa: ${properties.Desa || '-'}`,
+                        `Tanggal SK: ${formatTanggal(properties.Tanggal)}`,
+                        `Masa Berlaku: ${properties.Masa || '-'}`,
+                        `Tanggal Berakhir: ${formatTanggal(expiryDate.getTime())}`,
+                        `Jenis Pengingat: ${item.offsetLabel}`
+                    ].join('\n'),
+                    location: [properties.Kabupaten, properties.Kecamatan, properties.Desa].filter(Boolean).join(', ')
+                }));
+
+            if (!events.length) return null;
+
+            return {
+                feature_key: featureKey,
+                permit_key: permitKey || featureKey,
+                permit_name: properties.Nama || '-',
+                permit_type: properties.Izin || '-',
+                permit_status: properties.Status || '-',
+                nomor_sk: properties.Nomor_SK || '-',
+                masa_berlaku: properties.Masa || '-',
+                tanggal_sk: hasValue(properties.Tanggal) ? toIsoDateString(startDate) : null,
+                expiry_date: toIsoDateString(expiryDate),
+                events
+            };
+        }
+
+        function getCalendarSyncLogEntry(featureKey) {
+            return calendarSyncLog[featureKey] || null;
+        }
+
+        function getCalendarSyncBadge(feature) {
+            const featureKey = getGeoFeatureKey(feature);
+            const logEntry = getCalendarSyncLogEntry(featureKey);
+            const schedule = getIzinReminderSchedule(feature);
+
+            if (!schedule) {
+                return '<span class="calendar-sync-pill is-pending">Tanggal/masa tidak valid</span>';
+            }
+
+            if (!getGoogleCalendarWebhookUrl()) {
+                return '<span class="calendar-sync-pill is-pending">Webhook belum disetel</span>';
+            }
+
+            if (!logEntry) {
+                return '<span class="calendar-sync-pill is-pending">Belum sync</span>';
+            }
+
+            return `<span class="calendar-sync-pill">Sync ${safeHtml(formatDateTimeLabel(logEntry.syncedAt))}</span>`;
+        }
+
+        function getCalendarSyncButtonMarkup(feature, group) {
+            const schedule = getIzinReminderSchedule(feature);
+            const featureKey = getGeoFeatureKey(feature);
+            const webhookReady = Boolean(getGoogleCalendarWebhookUrl());
+            const disabledAttr = !schedule || !webhookReady ? ' disabled' : '';
+            const buttonLabel = schedule ? 'Sync' : 'Tidak Valid';
+
+            return `
+                <div class="table-action-stack">
+                    <button
+                        type="button"
+                        class="table-action-btn table-action-btn--calendar"
+                        data-calendar-sync-feature-key="${safeHtml(featureKey)}"
+                        data-calendar-sync-group="${safeHtml(group)}"${disabledAttr}
+                    >${buttonLabel}</button>
+                    ${getCalendarSyncBadge(feature)}
+                </div>
+            `;
+        }
+
+        async function syncFeatureReminderToGoogleCalendar(feature, options = {}) {
+            const schedule = getIzinReminderSchedule(feature);
+            if (!schedule) {
+                throw new Error('Data izin ini belum punya Tanggal SK atau Masa Berlaku yang valid untuk dihitung.');
+            }
+
+            const webhookUrl = getGoogleCalendarWebhookUrl();
+            if (!webhookUrl) {
+                throw new Error('Webhook Google Calendar belum disimpan.');
+            }
+
+            const response = await fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                },
+                body: JSON.stringify(schedule)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Webhook menolak request dengan status ${response.status}.`);
+            }
+
+            let result = null;
+            try {
+                result = await response.json();
+            } catch (error) {
+                result = { ok: true };
+            }
+
+            if (result && result.ok === false) {
+                throw new Error(result.message || 'Webhook Google Calendar mengembalikan respons gagal.');
+            }
+
+            calendarSyncLog[schedule.feature_key] = {
+                syncedAt: Date.now(),
+                expiryDate: schedule.expiry_date,
+                eventCount: schedule.events.length
+            };
+            writeStoredObject(GOOGLE_CALENDAR_SYNC_LOG_KEY, calendarSyncLog);
+
+            if (!options.silent) {
+                setGoogleCalendarStatus(`Izin "${schedule.permit_name}" berhasil dikirim ke Google Calendar (${schedule.events.length} event).`, 'success');
+            }
+
+            if (options.refreshUi !== false) {
+                applyFilters();
+            }
+            return result;
+        }
+
+        async function syncAllEligibleIzinReminders() {
+            if (!allData || !Array.isArray(allData.features)) {
+                setGoogleCalendarStatus('Data izin belum selesai dimuat.', 'error');
+                return;
+            }
+
+            const eligibleFeatures = allData.features.filter(feature => {
+                const izin = String(feature?.properties?.Izin || '').trim();
+                return izin && izin !== 'WPR' && Boolean(getIzinReminderSchedule(feature));
+            });
+
+            if (!eligibleFeatures.length) {
+                setGoogleCalendarStatus('Belum ada izin valid yang bisa disinkronkan ke Google Calendar.', 'error');
+                return;
+            }
+
+            setGoogleCalendarStatus(`Mengirim ${eligibleFeatures.length} izin ke Google Calendar...`, null);
+
+            let syncedCount = 0;
+            const failedNames = [];
+
+            for (const feature of eligibleFeatures) {
+                try {
+                    await syncFeatureReminderToGoogleCalendar(feature, { silent: true, refreshUi: false });
+                    syncedCount += 1;
+                } catch (error) {
+                    failedNames.push(String(feature?.properties?.Nama || 'Tanpa Nama'));
+                }
+            }
+
+            applyFilters();
+
+            if (failedNames.length) {
+                setGoogleCalendarStatus(`${syncedCount} izin berhasil disinkronkan. Gagal pada: ${failedNames.join(', ')}.`, 'error');
+                return;
+            }
+
+            setGoogleCalendarStatus(`${syncedCount} izin berhasil disinkronkan ke Google Calendar.`, 'success');
+        }
+
         function sortFeaturesByTanggalDesc(features) {
             return [...features].sort((featureA, featureB) => {
                 const tanggalA = Number(featureA?.properties?.Tanggal || 0);
@@ -3893,50 +4591,100 @@
         }
 
         function updateTable(data) {
-            const polygonTableBody = document.getElementById('polygonTableBody');
+            const iupOpTableBody = document.getElementById('iupOpTableBody');
+            const iupEksplorasiTableBody = document.getElementById('iupEksplorasiTableBody');
             const sipbTableBody = document.getElementById('sipbTableBody');
             const wprTableHead = document.getElementById('wprTableHead');
             const wprTableBody = document.getElementById('wprTableBody');
-            const generalIzinFeatures = sortFeaturesByTanggalDesc(
+            const iupOpFeatures = sortFeaturesByTanggalDesc(
+                data.features.filter(feature => (feature.properties.Izin || '').trim() === 'IUP OP')
+            );
+            const iupEksplorasiFeatures = sortFeaturesByTanggalDesc(
                 data.features.filter(feature => {
                     const izin = (feature.properties.Izin || '').trim();
-                    return izin !== 'WPR' && izin !== 'SIPB';
+                    return izin === 'IUP Eksplorasi' || izin === 'IUP Eks';
                 })
             );
             const sipbFeatures = sortFeaturesByTanggalDesc(
                 data.features.filter(feature => (feature.properties.Izin || '').trim() === 'SIPB')
             );
             const wprFeatures = data.features.filter(feature => (feature.properties.Izin || '').trim() === 'WPR');
-            currentGeneralIzinFeatures = generalIzinFeatures;
+            currentIupOpFeatures = iupOpFeatures;
+            currentIupEksplorasiFeatures = iupEksplorasiFeatures;
             currentSipbFeatures = sipbFeatures;
             currentWprFeatures = wprFeatures;
 
-            if (!generalIzinFeatures.length) {
-                polygonTableBody.innerHTML = `
+            if (!iupOpFeatures.length) {
+                iupOpTableBody.innerHTML = `
                     <tr>
-                        <td colspan="12" class="empty-table">Tidak ada data izin selain SIPB dan WPR yang sesuai dengan filter.</td>
+                        <td colspan="21" class="empty-table">Tidak ada data IUP OP yang sesuai dengan filter.</td>
                     </tr>
                 `;
             } else {
-                polygonTableBody.innerHTML = generalIzinFeatures.map(feature => {
+                iupOpTableBody.innerHTML = iupOpFeatures.map((feature, index) => {
                     const p = feature.properties || {};
                     const expiryAnalysis = getIzinExpiryAnalysis(p);
                     const featureKey = getGeoFeatureKey(feature);
 
                     return `
                         <tr class="${expiryAnalysis.rowClass}">
-                            <td><button type="button" class="table-focus-btn" data-feature-key="${safeHtml(featureKey)}" data-feature-group="general">${safeHtml(p.Nama || '-')}</button></td>
-                            <td>${p.Komoditas || '-'}</td>
-                            <td>${p.Izin || '-'}</td>
-                            <td>${p.Status || '-'}</td>
-                            <td>${p.Kabupaten || '-'}</td>
-                            <td>${p.Kecamatan || '-'}</td>
-                            <td>${p.Desa || '-'}</td>
+                            <td>${index + 1}</td>
+                            <td><button type="button" class="table-focus-btn" data-feature-key="${safeHtml(featureKey)}" data-feature-group="iup-op">${safeHtml(p.Nama || '-')}</button></td>
+                            <td>${renderTableTextCell(p.Komoditas, { compact: true })}</td>
+                            <td>${renderTableTextCell(p.Izin, { compact: true, strong: true })}</td>
+                            <td>${renderTableTextCell(p.Status, { compact: true, strong: true })}</td>
+                            <td>${renderTableTextCell(p.Kabupaten, { compact: true })}</td>
+                            <td>${renderTableTextCell(p.Kecamatan, { compact: true })}</td>
+                            <td>${renderTableTextCell(formatDesaDisplayValue(p.Desa), { compact: true })}</td>
                             <td>${Number(p.Area || 0).toFixed(2)}</td>
-                            <td>${p.Nomor_SK || '-'}</td>
+                            <td>${renderTableTextCell(p.KBLI, { compact: true })}</td>
+                            <td>${renderTableTextCell(p.NIB, { compact: true })}</td>
+                            <td>${renderTableTextCell(p.Nomor_SK, { wide: true })}</td>
+                            <td>${renderTableTextCell(getRkabDisplayValue(p), { compact: true })}</td>
+                            <td>${renderTableTextCell(p.Persetujuan_FS, { compact: true })}</td>
+                            <td>${renderTableTextCell(p.Pajak_MBLB, { compact: true, strong: true })}</td>
+                            <td>${renderTableTextCell(p.Dasar_Pajak, { wide: true, muted: true })}</td>
+                            <td>${renderTableTextCell(p.Direktur, { compact: true, strong: true })}</td>
                             <td>${formatTanggal(p.Tanggal)}</td>
-                            <td>${p.Masa || '-'}</td>
+                            <td>${renderTableTextCell(p.Masa, { compact: true })}</td>
                             <td><span class="${expiryAnalysis.badgeClass}">${expiryAnalysis.label}</span></td>
+                            <td>${getCalendarSyncButtonMarkup(feature, 'iup-op')}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            if (!iupEksplorasiFeatures.length) {
+                iupEksplorasiTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="17" class="empty-table">Tidak ada data IUP Eks yang sesuai dengan filter.</td>
+                    </tr>
+                `;
+            } else {
+                iupEksplorasiTableBody.innerHTML = iupEksplorasiFeatures.map((feature, index) => {
+                    const p = feature.properties || {};
+                    const expiryAnalysis = getIzinExpiryAnalysis(p);
+                    const featureKey = getGeoFeatureKey(feature);
+
+                    return `
+                        <tr class="${expiryAnalysis.rowClass}">
+                            <td>${index + 1}</td>
+                            <td><button type="button" class="table-focus-btn" data-feature-key="${safeHtml(featureKey)}" data-feature-group="iup-eksplorasi">${safeHtml(p.Nama || '-')}</button></td>
+                            <td>${renderTableTextCell(p.Komoditas, { compact: true })}</td>
+                            <td>${renderTableTextCell(p.Izin, { compact: true, strong: true })}</td>
+                            <td>${renderTableTextCell(p.Status, { compact: true, strong: true })}</td>
+                            <td>${renderTableTextCell(p.Kabupaten, { compact: true })}</td>
+                            <td>${renderTableTextCell(p.Kecamatan, { compact: true })}</td>
+                            <td>${renderTableTextCell(formatDesaDisplayValue(p.Desa), { compact: true })}</td>
+                            <td>${Number(p.Area || 0).toFixed(2)}</td>
+                            <td>${renderTableTextCell(p.Nomor_SK, { wide: true })}</td>
+                            <td>${renderTableTextCell(p.Pajak_MBLB, { compact: true, strong: true })}</td>
+                            <td>${renderTableTextCell(p.Dasar_Pajak, { wide: true, muted: true })}</td>
+                            <td>${renderTableTextCell(p.Direktur, { compact: true, strong: true })}</td>
+                            <td>${formatTanggal(p.Tanggal)}</td>
+                            <td>${renderTableTextCell(p.Masa, { compact: true })}</td>
+                            <td><span class="${expiryAnalysis.badgeClass}">${expiryAnalysis.label}</span></td>
+                            <td>${getCalendarSyncButtonMarkup(feature, 'iup-eksplorasi')}</td>
                         </tr>
                     `;
                 }).join('');
@@ -3945,29 +4693,34 @@
             if (!sipbFeatures.length) {
                 sipbTableBody.innerHTML = `
                     <tr>
-                        <td colspan="12" class="empty-table">Tidak ada data SIPB yang sesuai dengan filter.</td>
+                        <td colspan="17" class="empty-table">Tidak ada data SIPB yang sesuai dengan filter.</td>
                     </tr>
                 `;
             } else {
-                sipbTableBody.innerHTML = sipbFeatures.map(feature => {
+                sipbTableBody.innerHTML = sipbFeatures.map((feature, index) => {
                     const p = feature.properties || {};
                     const expiryAnalysis = getIzinExpiryAnalysis(p);
                     const featureKey = getGeoFeatureKey(feature);
 
                     return `
                         <tr class="${expiryAnalysis.rowClass}">
+                            <td>${index + 1}</td>
                             <td><button type="button" class="table-focus-btn" data-feature-key="${safeHtml(featureKey)}" data-feature-group="sipb">${safeHtml(p.Nama || '-')}</button></td>
-                            <td>${p.Komoditas || '-'}</td>
-                            <td>${p.Status || '-'}</td>
-                            <td>${p.Kabupaten || '-'}</td>
-                            <td>${p.Kecamatan || '-'}</td>
-                            <td>${p.Desa || '-'}</td>
+                            <td>${renderTableTextCell(p.Komoditas, { compact: true })}</td>
+                            <td>${renderTableTextCell(p.Status, { compact: true, strong: true })}</td>
+                            <td>${renderTableTextCell(p.Kabupaten, { compact: true })}</td>
+                            <td>${renderTableTextCell(p.Kecamatan, { compact: true })}</td>
+                            <td>${renderTableTextCell(formatDesaDisplayValue(p.Desa), { compact: true })}</td>
                             <td>${Number(p.Area || 0).toFixed(2)}</td>
-                            <td>${p.Nomor_SK || '-'}</td>
+                            <td>${renderTableTextCell(p.KBLI, { compact: true })}</td>
+                            <td>${renderTableTextCell(p.NIB, { compact: true })}</td>
+                            <td>${renderTableTextCell(p.Nomor_SK, { wide: true })}</td>
+                            <td>${renderTableTextCell(p.Direktur, { compact: true, strong: true })}</td>
                             <td>${formatTanggal(p.Tanggal)}</td>
-                            <td>${p.Masa || '-'}</td>
-                            <td>${p.Dok_Teknis || '-'}</td>
+                            <td>${renderTableTextCell(p.Masa, { compact: true })}</td>
+                            <td>${renderTableTextCell(p.Dok_Teknis, { compact: true })}</td>
                             <td><span class="${expiryAnalysis.badgeClass}">${expiryAnalysis.label}</span></td>
+                            <td>${getCalendarSyncButtonMarkup(feature, 'sipb')}</td>
                         </tr>
                     `;
                 }).join('');
@@ -3994,12 +4747,13 @@
             if (!wprFeatures.length) {
                 wprTableHead.innerHTML = `
                     <tr>
+                        <th>No.</th>
                         <th>Tabel WPR</th>
                     </tr>
                 `;
                 wprTableBody.innerHTML = `
                     <tr>
-                        <td class="empty-table">Tidak ada data WPR yang sesuai dengan filter.</td>
+                        <td colspan="2" class="empty-table">Tidak ada data WPR yang sesuai dengan filter.</td>
                     </tr>
                 `;
                 return;
@@ -4007,16 +4761,18 @@
 
             wprTableHead.innerHTML = `
                 <tr>
+                    <th>No.</th>
                     ${wprColumns.map(column => `<th>${column.label}</th>`).join('')}
                 </tr>
             `;
 
-            wprTableBody.innerHTML = wprFeatures.map(feature => {
+            wprTableBody.innerHTML = wprFeatures.map((feature, index) => {
                 const p = feature.properties || {};
                 const featureKey = getGeoFeatureKey(feature);
 
                 return `
                     <tr>
+                        <td>${index + 1}</td>
                         ${wprColumns.map((column, columnIndex) => columnIndex === 0
                             ? `<td><button type="button" class="table-focus-btn" data-feature-key="${safeHtml(featureKey)}" data-feature-group="wpr">${safeHtml(getFieldDisplayValue(column.key, p))}</button></td>`
                             : `<td>${getFieldDisplayValue(column.key, p)}</td>`).join('')}
@@ -4044,7 +4800,7 @@
                     const p = feature.properties;
                     const statusTheme = getStatusTheme(p.Status);
                     const izin = (p.Izin || '').trim();
-                    const showRkabBox = izin === 'IUP OP' || izin === 'IUP Eksplorasi';
+                    const showRkabBox = izin === 'IUP OP' || izin === 'IUP Eksplorasi' || izin === 'IUP Eks';
                     const showDokTeknisBox = izin === 'SIPB';
                     const rkabContent = showRkabBox ? `
                             <div class="popup-rkab-box" style="background:${statusTheme.boxBackground}; border-color:${statusTheme.boxBorder};">
@@ -4069,7 +4825,10 @@
                             ${rkabContent}
                              <b>Komoditas:</b> ${p.Komoditas || '-'}<br>
                              <b>Jenis Izin:</b> ${p.Izin || '-'}<br>
-                             <div class="popup-location-line"><b>Lokasi:</b> ${p.Kabupaten || '-'}, ${p.Kecamatan || '-'}, ${p.Desa || '-'}</div>
+                             <b>KBLI:</b> ${p.KBLI || '-'}<br>
+                             <b>NIB:</b> ${p.NIB || '-'}<br>
+                             <b>Direktur:</b> ${p.Direktur || '-'}<br>
+                             <div class="popup-location-line"><b>Lokasi:</b> ${p.Kabupaten || '-'}, ${p.Kecamatan || '-'}, ${formatDesaDisplayValue(p.Desa)}</div>
                              <b>Luas Area:</b> ${Number(p.Area || 0).toFixed(2)} Ha<br>
                              <b>Nomor SK:</b> ${p.Nomor_SK || '-'}<br>
                              <b>Tanggal SK:</b> ${formatTanggal(p.Tanggal)}<br>
@@ -4101,7 +4860,8 @@
         function updateCards(data) {
             const countedIzin = data.features.filter(feature => {
                 const izin = (feature?.properties?.Izin || '').trim();
-                return izin === 'SIPB' || izin === 'IUP OP' || izin === 'IUP Eksplorasi';
+                const status = String(feature?.properties?.Status || '').trim().toLowerCase();
+                return (izin === 'SIPB' || izin === 'IUP OP' || izin === 'IUP Eksplorasi' || izin === 'IUP Eks') && status === 'aktif';
             });
             const totalIzin = countedIzin.length;
             const totalLuas = getWilayahKerjaTotalAreaHa();
@@ -4157,7 +4917,7 @@
                 const izin = (f.properties.Izin || '').toLowerCase();
 
                 // hanya IUP OP & Eksplorasi
-                if (izin === 'iup op' || izin === 'iup eksplorasi') {
+                if (izin === 'iup op' || izin === 'iup eksplorasi' || izin === 'iup eks') {
                     const status = classifyRkabStatus(f.properties.RKAB || '');
                     result[status]++;
                 }
@@ -4200,8 +4960,102 @@
             return null;
         }
 
+        function sanitizeKecamatanName(value) {
+            return String(value || '')
+                .replace(/^kec\.\s*/i, '')
+                .trim();
+        }
+
+        function getImportedIupTypeAndStatus(properties) {
+            const rawStatus = String(properties?.STATUS || '').trim();
+            const normalizedStatus = rawStatus.toLowerCase();
+
+            if (normalizedStatus.includes('iup eks')) {
+                return {
+                    izin: 'IUP Eks',
+                    status: normalizedStatus.includes('berakhir') ? 'Masa Berlaku Habis' : 'Aktif',
+                    nomorSk: String(properties?.NO_SK_EKS || '-').trim(),
+                    tanggal: hasValue(properties?.AWAL_SK_A) ? Number(properties.AWAL_SK_A) : null,
+                    masa: String(properties?.LAMA_EKS || '-').trim()
+                };
+            }
+
+            return {
+                izin: 'IUP OP',
+                status: normalizedStatus.includes('berakhir') ? 'Masa Berlaku Habis' : 'Aktif',
+                nomorSk: String(properties?.NO_SK_OP || '-').trim(),
+                tanggal: hasValue(properties?.AWAL_SK_B) ? Number(properties.AWAL_SK_B) : null,
+                masa: String(properties?.LAMA_OP || '-').trim()
+            };
+        }
+
+        function shouldExcludeImportedIupFeature(properties) {
+            const nama = String(properties?.NAME || '').trim().toLowerCase();
+            const status = String(properties?.STATUS || '').trim().toLowerCase();
+
+            return nama === 'cv. gunung kulabu' && status.includes('iup eks');
+        }
+
+        function convertExpiredIupFeature(feature, index) {
+            const properties = feature?.properties || {};
+            const izinInfo = getImportedIupTypeAndStatus(properties);
+            const tanggalBerakhir = izinInfo.izin === 'IUP Eks'
+                ? properties.AKHIR_SK_A
+                : properties.AKHIR_SK_B;
+
+            return {
+                type: 'Feature',
+                id: `expired-iup:${index}`,
+                geometry: feature?.geometry || null,
+                properties: {
+                    FID: properties.FID ?? index,
+                    Nama: String(properties.NAME || '-').trim(),
+                    Komoditas: String(properties.KOMODITAS || '-').trim(),
+                    Area: parseLocalizedNumber(properties.LUAS_HA),
+                    Status: izinInfo.status,
+                    Izin: izinInfo.izin,
+                    Nomor_SK: izinInfo.nomorSk,
+                    Masa: izinInfo.masa || '-',
+                    Tanggal: izinInfo.tanggal,
+                    Tanggal_Berakhir: hasValue(tanggalBerakhir) ? Number(tanggalBerakhir) : null,
+                    Kabupaten: String(properties.KABUPATEN || '-').trim(),
+                    Kecamatan: sanitizeKecamatanName(properties.KECAMATAN),
+                    Desa: String(properties.DESA_KEL || '-').trim(),
+                    KBLI: String(properties.KBLI || '-').trim(),
+                    NIB: String(properties.NIB || '-').trim(),
+                    Nomor_Persetujuan_RKAB: String(properties.RKAB || properties.RKAB_2026 || '-').trim(),
+                    Persetujuan_FS: String(properties.NO_TGL_FS || properties.LAP_FS || '-').trim(),
+                    Pajak_MBLB: String(properties.PAJAK_MBLB || '-').trim(),
+                    Dasar_Pajak: String(properties.DASARPAJAK || '-').trim(),
+                    Direktur: String(properties.DIREKTUR || '-').trim(),
+                    RKAB: String(properties.RKAB || 'Tidak mengajukan permohonan RKAB').trim(),
+                    Dok_Teknis: String(properties.DOK_LINGK || properties.IZIN_LINGK || '').trim(),
+                    Keterangan: String(properties.KETERANGAN || '').trim()
+                }
+            };
+        }
+
+        function mergeDashboardData(primaryData, expiredIupData) {
+            const primaryFeatures = Array.isArray(primaryData?.features) ? primaryData.features : [];
+            const expiredFeatures = Array.isArray(expiredIupData?.features)
+                ? expiredIupData.features
+                    .filter(feature => !shouldExcludeImportedIupFeature(feature?.properties || {}))
+                    .map(convertExpiredIupFeature)
+                    .filter(feature => feature.geometry)
+                : [];
+
+            return {
+                type: 'FeatureCollection',
+                features: primaryFeatures.concat(expiredFeatures)
+            };
+        }
+
         function updateCharts(data) {
             const izinCounts = countByField(data.features, 'Izin');
+            const activeOnlyFeatures = data.features.filter(feature => {
+                const status = String(feature?.properties?.Status || '').trim().toLowerCase();
+                return status === 'aktif';
+            });
             const statusCounts = countByField(data.features, 'Status');
             const komoditasColors = ['#fe9ec7', '#4da6ff', '#00c27a', '#ffaa00', '#7d6bff', '#ff7a59', '#6c757d', '#6ec1ff'];
             const analisisKomoditasItems = [
@@ -4284,7 +5138,7 @@
             });
             
             // ðŸ”¥ RKAB CHART
-            const rkabData = getRKAB_IUP(data.features);
+            const rkabData = getRKAB_IUP(activeOnlyFeatures);
             const dokTeknisData = getDokTeknisSIPB(data.features);
 
             rkabChart = new Chart(document.getElementById('rkabChart'), {
@@ -4375,15 +5229,28 @@
             });
         }
 
-        fetch('data/WGS2_Dashboard.json')
-            .then(response => response.json())
-            .then(data => {
-                allData = data;
-                populateFilters(data);
-                renderMap(data);
-                updateTable(data);
-                updateCards(data);
-                updateCharts(data);
+        Promise.all([
+            fetch('data/WGS2_Dashboard.json', { cache: 'no-store' }).then(response => {
+                if (!response.ok) {
+                    throw new Error(`Gagal membaca data utama: ${response.status}`);
+                }
+                return response.json();
+            }),
+            fetch(EXPIRED_IUP_DATA_URL, { cache: 'no-store' }).then(response => {
+                if (!response.ok) {
+                    throw new Error(`Gagal membaca data IUP berakhir: ${response.status}`);
+                }
+                return response.json();
+            })
+        ])
+            .then(([primaryData, expiredIupData]) => {
+                const mergedData = mergeDashboardData(primaryData, expiredIupData);
+                allData = mergedData;
+                populateFilters(mergedData);
+                renderMap(mergedData);
+                updateTable(mergedData);
+                updateCards(mergedData);
+                updateCharts(mergedData);
             })
             .catch(error => {
                 console.error('Gagal membaca GeoJSON:', error);
@@ -4455,6 +5322,8 @@
             switchManualPointCoordinateFormat('dms');
         });
         document.getElementById('checkManualPointButton').addEventListener('click', previewManualPoint);
+        document.getElementById('saveGoogleCalendarConfigButton').addEventListener('click', saveGoogleCalendarWebhookUrl);
+        document.getElementById('syncAllGoogleCalendarButton').addEventListener('click', syncAllEligibleIzinReminders);
         document.getElementById('locateMeButton').addEventListener('click', showCurrentLocation);
         document.getElementById('clearLocationButton').addEventListener('click', clearCurrentLocation);
         document.getElementById('petiGeojsonFile').addEventListener('change', loadPetiGeoJsonFromFile);
@@ -4475,12 +5344,24 @@
             if (!deleteId) return;
             deletePetiPoint(deleteId);
         });
-        document.getElementById('polygonTableBody').addEventListener('click', function(event) {
+        document.getElementById('iupOpTableBody').addEventListener('click', function(event) {
+            const syncButton = event.target.closest('[data-calendar-sync-feature-key]');
+            if (syncButton) {
+                const featureKey = syncButton.getAttribute('data-calendar-sync-feature-key') || '';
+                const feature = currentIupOpFeatures.find(item => getGeoFeatureKey(item) === featureKey);
+                if (!feature) return;
+
+                syncFeatureReminderToGoogleCalendar(feature).catch(error => {
+                    setGoogleCalendarStatus(error.message || 'Sinkronisasi Google Calendar gagal.', 'error');
+                });
+                return;
+            }
+
             const focusButton = event.target.closest('[data-feature-key]');
             if (!focusButton) return;
             highlightTableButtonTemporarily(focusButton);
             const featureKey = focusButton.getAttribute('data-feature-key') || '';
-            const clickedFeature = currentGeneralIzinFeatures.find(item => getGeoFeatureKey(item) === featureKey);
+            const clickedFeature = currentIupOpFeatures.find(item => getGeoFeatureKey(item) === featureKey);
             if (clickedFeature) {
                 showNameInDashboardVisualization(clickedFeature.properties?.Nama || '');
                 const mapPanel = document.getElementById('map-panel');
@@ -4488,12 +5369,54 @@
                     mapPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
                 window.setTimeout(() => {
-                    const feature = currentGeneralIzinFeatures.find(item => getGeoFeatureKey(item) === featureKey) || clickedFeature;
+                    const feature = currentIupOpFeatures.find(item => getGeoFeatureKey(item) === featureKey) || clickedFeature;
+                    focusMapOnGeoFeature(feature);
+                }, 120);
+            }
+        });
+        document.getElementById('iupEksplorasiTableBody').addEventListener('click', function(event) {
+            const syncButton = event.target.closest('[data-calendar-sync-feature-key]');
+            if (syncButton) {
+                const featureKey = syncButton.getAttribute('data-calendar-sync-feature-key') || '';
+                const feature = currentIupEksplorasiFeatures.find(item => getGeoFeatureKey(item) === featureKey);
+                if (!feature) return;
+
+                syncFeatureReminderToGoogleCalendar(feature).catch(error => {
+                    setGoogleCalendarStatus(error.message || 'Sinkronisasi Google Calendar gagal.', 'error');
+                });
+                return;
+            }
+
+            const focusButton = event.target.closest('[data-feature-key]');
+            if (!focusButton) return;
+            highlightTableButtonTemporarily(focusButton);
+            const featureKey = focusButton.getAttribute('data-feature-key') || '';
+            const clickedFeature = currentIupEksplorasiFeatures.find(item => getGeoFeatureKey(item) === featureKey);
+            if (clickedFeature) {
+                showNameInDashboardVisualization(clickedFeature.properties?.Nama || '');
+                const mapPanel = document.getElementById('map-panel');
+                if (mapPanel && typeof mapPanel.scrollIntoView === 'function') {
+                    mapPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                window.setTimeout(() => {
+                    const feature = currentIupEksplorasiFeatures.find(item => getGeoFeatureKey(item) === featureKey) || clickedFeature;
                     focusMapOnGeoFeature(feature);
                 }, 120);
             }
         });
         document.getElementById('sipbTableBody').addEventListener('click', function(event) {
+            const syncButton = event.target.closest('[data-calendar-sync-feature-key]');
+            if (syncButton) {
+                const featureKey = syncButton.getAttribute('data-calendar-sync-feature-key') || '';
+                const feature = currentSipbFeatures.find(item => getGeoFeatureKey(item) === featureKey);
+                if (!feature) return;
+
+                syncFeatureReminderToGoogleCalendar(feature).catch(error => {
+                    setGoogleCalendarStatus(error.message || 'Sinkronisasi Google Calendar gagal.', 'error');
+                });
+                return;
+            }
+
             const focusButton = event.target.closest('[data-feature-key]');
             if (!focusButton) return;
             highlightTableButtonTemporarily(focusButton);
@@ -4530,6 +5453,7 @@
             }
         });
         initializeLogin();
+        initializeGoogleCalendarSettings();
     </script>
 </body>
 <script>
