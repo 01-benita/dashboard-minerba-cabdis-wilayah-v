@@ -5035,10 +5035,9 @@
         }
 
         function shouldExcludeImportedIupFeature(properties) {
-            const nama = String(properties?.NAME || '').trim().toLowerCase();
             const status = String(properties?.STATUS || '').trim().toLowerCase();
 
-            return nama === 'cv. gunung kulabu' && status.includes('iup eks');
+            return !status.includes('berakhir');
         }
 
         function convertExpiredIupFeature(feature, index) {
@@ -5115,11 +5114,33 @@
         }
 
         function updateCharts(data) {
-            const izinCounts = countByField(data.features, 'Izin');
             const activeOnlyFeatures = data.features.filter(feature => {
                 const status = String(feature?.properties?.Status || '').trim().toLowerCase();
                 return status === 'aktif';
             });
+            const activeIzinCounts = activeOnlyFeatures.reduce((counts, feature) => {
+                const rawIzin = String(feature?.properties?.Izin || '').trim();
+                const normalizedIzin = rawIzin === 'IUP Eks' ? 'IUP Eksplorasi' : rawIzin;
+
+                if (!normalizedIzin) return counts;
+
+                counts[normalizedIzin] = (counts[normalizedIzin] || 0) + 1;
+                return counts;
+            }, {
+                'WPR': 0,
+                'SIPB': 0,
+                'IUP OP': 0,
+                'IUP Eksplorasi': 0
+            });
+            const wprDalamProsesCount = data.features.filter(feature => {
+                const izin = String(feature?.properties?.Izin || '').trim();
+                const status = String(feature?.properties?.Status || '').trim().toLowerCase();
+                return izin === 'WPR' && status === 'dalam proses';
+            }).length;
+            const izinCounts = {
+                ...activeIzinCounts,
+                WPR: wprDalamProsesCount
+            };
             const statusCounts = countByField(data.features, 'Status');
             const komoditasColors = ['#fe9ec7', '#4da6ff', '#00c27a', '#ffaa00', '#7d6bff', '#ff7a59', '#6c757d', '#6ec1ff'];
             const analisisKomoditasItems = [
