@@ -1047,6 +1047,42 @@
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.95);
         }
 
+        .table-scroll-top {
+            overflow-x: auto;
+            overflow-y: hidden;
+            height: 14px;
+            margin-bottom: 8px;
+            border: 1px solid #eed9e5;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(255,246,251,0.96) 100%);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.95);
+        }
+
+        .table-scroll-top.is-hidden {
+            display: none;
+        }
+
+        .table-scroll-top__inner {
+            height: 1px;
+        }
+
+        .table-scroll-top::-webkit-scrollbar,
+        .table-wrap::-webkit-scrollbar {
+            height: 10px;
+        }
+
+        .table-scroll-top::-webkit-scrollbar-thumb,
+        .table-wrap::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, #f3a0c7 0%, #ee8fc1 100%);
+            border-radius: 999px;
+        }
+
+        .table-scroll-top::-webkit-scrollbar-track,
+        .table-wrap::-webkit-scrollbar-track {
+            background: rgba(244, 228, 237, 0.9);
+            border-radius: 999px;
+        }
+
         .data-table {
             width: max-content;
             border-collapse: collapse;
@@ -2886,6 +2922,56 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
+        }
+
+        function ensureTopScrollbarForTableWrap(tableWrap) {
+            if (!tableWrap) return null;
+
+            let topScrollbar = tableWrap.previousElementSibling;
+            if (!topScrollbar || !topScrollbar.classList.contains('table-scroll-top')) {
+                topScrollbar = document.createElement('div');
+                topScrollbar.className = 'table-scroll-top';
+
+                const inner = document.createElement('div');
+                inner.className = 'table-scroll-top__inner';
+                topScrollbar.appendChild(inner);
+
+                tableWrap.parentNode.insertBefore(topScrollbar, tableWrap);
+
+                let isSyncing = false;
+
+                topScrollbar.addEventListener('scroll', function() {
+                    if (isSyncing) return;
+                    isSyncing = true;
+                    tableWrap.scrollLeft = topScrollbar.scrollLeft;
+                    isSyncing = false;
+                });
+
+                tableWrap.addEventListener('scroll', function() {
+                    if (isSyncing) return;
+                    isSyncing = true;
+                    topScrollbar.scrollLeft = tableWrap.scrollLeft;
+                    isSyncing = false;
+                });
+            }
+
+            return topScrollbar;
+        }
+
+        function syncTopTableScrollbars() {
+            document.querySelectorAll('.table-wrap').forEach(tableWrap => {
+                const table = tableWrap.querySelector('table');
+                const topScrollbar = ensureTopScrollbarForTableWrap(tableWrap);
+                if (!table || !topScrollbar) return;
+
+                const inner = topScrollbar.querySelector('.table-scroll-top__inner');
+                const scrollWidth = Math.ceil(table.scrollWidth);
+                const clientWidth = Math.ceil(tableWrap.clientWidth);
+
+                inner.style.width = `${scrollWidth}px`;
+                topScrollbar.classList.toggle('is-hidden', scrollWidth <= clientWidth);
+                topScrollbar.scrollLeft = tableWrap.scrollLeft;
+            });
         }
 
         function convertDmsToDecimal(degrees, minutes, seconds, hemisphere, axisLabel) {
@@ -4801,6 +4887,7 @@
                         <td colspan="2" class="empty-table">Tidak ada data WPR yang sesuai dengan filter.</td>
                     </tr>
                 `;
+                requestAnimationFrame(syncTopTableScrollbars);
                 return;
             }
 
@@ -4824,6 +4911,8 @@
                     </tr>
                 `;
             }).join('');
+
+            requestAnimationFrame(syncTopTableScrollbars);
         }
 
         function renderMap(data) {
@@ -5386,6 +5475,7 @@
         document.getElementById('filterStatus').addEventListener('change', applyFilters);
         document.getElementById('mobileMenuButton').addEventListener('click', toggleSidebar);
         document.getElementById('sidebarOverlay').addEventListener('click', closeSidebarOnMobile);
+        window.addEventListener('resize', syncTopTableScrollbars);
         bindMobileSidebarMenuBehavior();
         document.getElementById('inputGeojsonFile').addEventListener('change', loadInputGeoJsonFromFile);
         document.getElementById('wiupKoordinatFile').addEventListener('change', loadWiupCoordinatesFromExcel);
