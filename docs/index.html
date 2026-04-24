@@ -2347,7 +2347,7 @@
                 </div>
 
                 <div class="panel panel-wide">
-                    <h3>Analisis Jenis Komoditas</h3>
+                    <h3>Analisis Jenis Komoditas Izin Aktif</h3>
                     <div class="chart-wrap chart-wrap--bar">
                         <canvas id="komoditasBarChart"></canvas>
                     </div>
@@ -5243,8 +5243,12 @@
             const analisisKomoditasCounts = Object.fromEntries(
                 analisisKomoditasLabels.map(label => [label, 0])
             );
+            const analisisKomoditasFeatures = activeOnlyFeatures.filter(feature => {
+                const izin = String(feature?.properties?.Izin || '').trim();
+                return izin === 'SIPB' || izin === 'IUP OP' || izin === 'IUP Eksplorasi' || izin === 'IUP Eks';
+            });
 
-            data.features.forEach(feature => {
+            analisisKomoditasFeatures.forEach(feature => {
                 const normalizedKomoditas = normalizeKomoditasForAnalysis(feature.properties.Komoditas);
                 if (normalizedKomoditas) {
                     analisisKomoditasCounts[normalizedKomoditas]++;
