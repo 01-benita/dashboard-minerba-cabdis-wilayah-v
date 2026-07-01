@@ -2145,12 +2145,11 @@
                                     <th>Latitude (Y)</th>
                                     <th>Foto</th>
                                     <th>Keterangan</th>
-                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="petiTableBody">
                                 <tr>
-                                    <td colspan="10" class="empty-table">Belum ada titik PETI yang diinput.</td>
+                                    <td colspan="9" class="empty-table">Belum ada titik PETI yang diinput.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -3610,19 +3609,17 @@
         }
 
         function shouldHidePetiPhoto(point) {
-            const nama = String(point?.nama || '').trim().toLowerCase();
-            return nama === 'peti tantom galian pinggir sungai';
+            return false;
         }
 
         function renderPetiTable(points = petiPoints) {
             const petiTableBody = document.getElementById('petiTableBody');
-            const canEdit = isEditor();
             currentFilteredPetiPoints = points;
 
             if (!points.length) {
                 petiTableBody.innerHTML = `
                     <tr>
-                        <td colspan="10" class="empty-table">Belum ada titik PETI yang diinput.</td>
+                        <td colspan="9" class="empty-table">Belum ada titik PETI yang diinput.</td>
                     </tr>
                 `;
                 return;
@@ -3639,7 +3636,6 @@
                     <td>${safeHtml(formatCoordinate(point.latitude))}</td>
                     <td>${point.photoDataUrl && !shouldHidePetiPhoto(point) ? '<a href="' + safeHtml(point.photoDataUrl) + '" target="_blank" rel="noopener noreferrer" class="peti-photo-link">Lihat Foto</a>' : '-'}</td>
                     <td>${safeHtml(point.keterangan || '-')}</td>
-                    <td>${canEdit ? '<button type="button" class="table-action-btn" data-peti-delete-id="' + safeHtml(point.id) + '">Hapus</button>' : '<span>-</span>'}</td>
                 </tr>
             `).join('');
         }
@@ -5516,10 +5512,6 @@
                 }
                 return;
             }
-
-            const deleteId = event.target.getAttribute('data-peti-delete-id');
-            if (!deleteId) return;
-            deletePetiPoint(deleteId);
         });
         document.getElementById('iupOpTableBody').addEventListener('click', function(event) {
             const syncButton = event.target.closest('[data-calendar-sync-feature-key]');
