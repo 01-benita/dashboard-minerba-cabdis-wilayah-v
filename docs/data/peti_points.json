@@ -196,5 +196,93 @@
     "latitude": 1.441622222,
     "keterangan": "Hutaraja, Kec. Batang Toru, Kab. Tapanuli Selatan",
     "photoDataUrl": ""
+  },
+  {
+    "id": "peti-aek-nabara",
+    "nama": "PETI Aek Nabara",
+    "komoditas": "Mineral Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": null,
+    "longitude": 99.437497,
+    "latitude": 0.582039,
+    "keterangan": "Desa Aek Nabara, Kec. Batang Natal, Kab. Mandailing Natal, Indonesia",
+    "photoDataUrl": "data/peti_photos/Peti Aek Nabara.png"
+  },
+  {
+    "id": "peti-kotanopan",
+    "nama": "PETI Kotanopan",
+    "komoditas": "Mineral Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": null,
+    "longitude": 99.710025,
+    "latitude": 0.667583,
+    "keterangan": "Kec. Kotanopan, Kab. Mandailing Natal",
+    "photoDataUrl": "data/peti_photos/Peti Kotanopan.jpeg"
+  },
+  {
+    "id": "peti-aek-manggis",
+    "nama": "PETI Aek Manggis",
+    "komoditas": "Mineral Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": null,
+    "longitude": 99.314928,
+    "latitude": 0.684947,
+    "keterangan": "Desa Aek Manggis, Kec. Batang Natal, Kab. Mandailing Natal",
+    "photoDataUrl": "data/peti_photos/Peti Aek Manggis.png"
+  },
+  {
+    "id": "peti-aek-garingging",
+    "nama": "PETI Aek Garingging",
+    "komoditas": "Mineral Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": null,
+    "longitude": 99.275678,
+    "latitude": 0.619819,
+    "keterangan": "Desa Aek Garingging, Kec. Lingga Bayu, Kab. Mandailing Natal",
+    "photoDataUrl": "data/peti_photos/Sungai Aek Garingging.png"
+  },
+  {
+    "id": "peti-ulu-pungkut",
+    "nama": "PETI Ulu Pungkut",
+    "komoditas": "Mineral Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": 1782147600000,
+    "longitude": 99.748583,
+    "latitude": 0.557967,
+    "keterangan": "Desa Tolang, Kec. Ulu Pungkut, Kab. Mandailing Natal",
+    "photoDataUrl": "data/peti_photos/Peti Ulu Pungkut.jpeg"
+  },
+  {
+    "id": "peti-tapus",
+    "nama": "PETI Tapus",
+    "komoditas": "Mineral Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": 1664730000000,
+    "longitude": 99.246419,
+    "latitude": 0.557114,
+    "keterangan": "Kel. Tapus, Kec. Lingga Bayu, Kab. Mandailing Natal",
+    "photoDataUrl": "data/peti_photos/Peti Tapus.jpg"
+  },
+  {
+    "id": "peti-napogos",
+    "nama": "PETI Napogos",
+    "komoditas": "Mineral Bukan Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": 1779123600000,
+    "longitude": 98.826697,
+    "latitude": 1.721281,
+    "keterangan": "Jl. A. R. Surbakti, Sibuluan Nauli, Kec. Pandan, Kab. Tapanuli Tengah",
+    "photoDataUrl": "data/peti_photos/Peti Napogos.jpeg"
+  },
+  {
+    "id": "peti-sipaga-paga",
+    "nama": "PETI Sipaga-paga",
+    "komoditas": "Mineral Bukan Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": 1778086800000,
+    "longitude": 99.598636,
+    "latitude": 0.780041,
+    "keterangan": "Desa Sipapaga, Kec. Panyabungan, Kab. Mandailing Natal",
+    "photoDataUrl": "data/peti_photos/Peti Sipaga-paga.jpeg"
   }
 ]
