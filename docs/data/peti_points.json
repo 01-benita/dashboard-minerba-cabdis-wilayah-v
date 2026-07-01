@@ -74,7 +74,7 @@
     "longitude": 99.31495556,
     "latitude": 1.044080556,
     "keterangan": "Asak Jarum, Kel. Panabari, Kec. Tano Tombangan, Kab. Tapanuli Selatan",
-    "photoDataUrl": "data/peti_photos/peti-tantom-pinggir-sungai.jpg"
+    "photoDataUrl": "data/peti_photos/Peti Tantom Galian Sungai.png"
   },
   {
     "id": "peti-tantom-lokasi-galian-1",
@@ -284,5 +284,38 @@
     "latitude": 0.780041,
     "keterangan": "Desa Sipapaga, Kec. Panyabungan, Kab. Mandailing Natal",
     "photoDataUrl": "data/peti_photos/Peti Sipaga-paga.jpeg"
+  },
+  {
+    "id": "peti-akses-mosa-julu",
+    "nama": "PETI Akses Peti Mosa Julu",
+    "komoditas": "Mineral Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": 1782666000000,
+    "longitude": 99.248841,
+    "latitude": 1.220159,
+    "keterangan": "Dusun Gunung Baringin, Desa Mosa Julu, Kec. Angkola Selatan, Kab. Tapanuli Selatan",
+    "photoDataUrl": "data/peti_photos/Akses Jalan Peti Mosa.jpeg"
+  },
+  {
+    "id": "peti-lokasi-kk-smm",
+    "nama": "PETI di Lokasi KK SMM",
+    "komoditas": "Mineral Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": null,
+    "longitude": 99.4443472,
+    "latitude": 0.9128888,
+    "keterangan": "Humbang I, Kec. Naga Juang, Kab. Mandailing Natal",
+    "photoDataUrl": "data/peti_photos/Peti di Lokasi KK SMM.png"
+  },
+  {
+    "id": "peti-gelundung-panyabungan",
+    "nama": "PETI Gelundung Panyabungan",
+    "komoditas": "Mineral Logam",
+    "sumber": "Sumber Lain",
+    "tanggal": null,
+    "longitude": 99.547444,
+    "latitude": 0.8660416,
+    "keterangan": "Panyabungan Jae, Kec. Panyabungan, Kab. Mandailing Natal",
+    "photoDataUrl": "data/peti_photos/Gelundung Panyabungan.jpg"
   }
 ]
