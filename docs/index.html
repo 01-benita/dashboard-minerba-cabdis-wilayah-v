@@ -1883,7 +1883,7 @@
             <div class="topbar-actions">
                 <span class="role-badge" id="roleBadge">Mode Review</span>
                 <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Cari nama perusahaan...">
+                    <input type="text" id="searchInput" placeholder="Cari nama perusahaan/direktur...">
                     <div class="search-suggestions" id="searchSuggestions"></div>
                 </div>
                 <button type="button" class="outline-btn" id="logoutButton">Logout</button>
@@ -2773,10 +2773,12 @@
 
             if (allData && Array.isArray(allData.features)) {
                 allData.features.forEach(feature => {
-                    const name = String(feature?.properties?.Nama || '').trim();
-                    if (name) {
-                        allNames.push(name);
-                    }
+                    ['Nama', 'Direktur'].forEach(field => {
+                        const value = String(feature?.properties?.[field] || '').trim();
+                        if (value) {
+                            allNames.push(value);
+                        }
+                    });
                 });
             }
 
@@ -4256,8 +4258,9 @@
             const filteredFeatures = allData.features.filter(feature => {
                 const p = feature.properties;
                 const nama = (p.Nama || '').toLowerCase();
+                const direktur = (p.Direktur || '').toLowerCase();
 
-                return (!keyword || nama.includes(keyword)) &&
+                return (!keyword || nama.includes(keyword) || direktur.includes(keyword)) &&
                        (!kabupaten || p.Kabupaten === kabupaten) &&
                        (!kecamatan || p.Kecamatan === kecamatan) &&
                        (!izin || p.Izin === izin) &&
